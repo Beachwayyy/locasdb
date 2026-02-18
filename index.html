@@ -71,12 +71,44 @@
 
         .screen.active {
             display: flex;
-            animation: screenIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: screenIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         @keyframes screenIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { 
+                opacity: 0; 
+                transform: translateY(10px) scale(0.98);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255,255,255,0.1); }
+            50% { box-shadow: 0 0 20px rgba(255,255,255,0.2); }
         }
 
         /* Header */
@@ -114,32 +146,39 @@
 
         /* Landing Page */
         .landing-header {
-            padding: 32px 24px 16px;
+            padding: 24px 20px 12px;
             text-align: left;
             display: flex;
             align-items: center;
             gap: 12px;
+            animation: fadeInUp 0.5s ease forwards;
         }
 
         .landing-logo {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-            border-radius: 10px;
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
+            border-radius: 12px;
             border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: glow 3s ease-in-out infinite;
         }
 
         .landing-logo svg {
-            opacity: 0.8;
+            opacity: 0.9;
         }
 
         .landing-title {
-            font-size: 24px;
-            font-weight: 400;
-            letter-spacing: 1px;
+            font-size: 22px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #fff 0%, #888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .section-title {
@@ -181,34 +220,40 @@
         }
 
         .graph-card {
-            aspect-ratio: 0.9;
-            background: linear-gradient(145deg, var(--bg-card) 0%, #121212 100%);
+            background: linear-gradient(145deg, var(--bg-card) 0%, #101010 100%);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 14px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
             cursor: pointer;
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
                         border-color 0.3s ease,
                         box-shadow 0.3s ease;
+            animation: fadeInUp 0.4s ease forwards;
+            animation-delay: calc(var(--card-index, 0) * 0.05s);
+            opacity: 0;
         }
 
         .graph-card:hover {
-            border-color: #3a3a3a;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            border-color: #404040;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            transform: translateY(-2px);
         }
 
         .graph-card:active {
-            transform: scale(0.96);
+            transform: scale(0.95) translateY(0);
+            transition: transform 0.1s ease;
         }
 
         .graph-card-preview {
-            flex: 1;
-            padding: 8px;
+            aspect-ratio: 1;
+            padding: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
+            border-radius: 12px 12px 0 0;
         }
 
         .graph-card-preview canvas {
@@ -219,14 +264,15 @@
         .graph-card-name {
             font-size: 10px;
             text-align: center;
-            padding: 4px 6px;
+            padding: 6px 4px;
             color: var(--text-secondary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            flex-shrink: 0;
             border-top: 1px solid var(--border-color);
             background: var(--bg-card);
+            border-radius: 0 0 12px 12px;
+            min-height: 22px;
         }
 
         /* Bottom Navigation */
@@ -260,36 +306,45 @@
             flex-direction: column;
             align-items: center;
             gap: 4px;
-            transition: color 0.3s ease, transform 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
-            min-width: 50px;
+            min-width: 56px;
             min-height: 50px;
             justify-content: center;
+            border-radius: 12px;
         }
 
         .nav-item.active {
             color: var(--text-primary);
+            background: rgba(255,255,255,0.05);
         }
 
-        .nav-item.active::after {
+        .nav-item.active::before {
             content: '';
             position: absolute;
-            top: 0;
+            top: 4px;
             left: 50%;
             transform: translateX(-50%);
-            width: 20px;
-            height: 3px;
-            background: var(--text-primary);
-            border-radius: 0 0 3px 3px;
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(255,255,255,0.5);
         }
 
         .nav-item:active {
-            transform: scale(0.92);
+            transform: scale(0.9);
+            background: rgba(255,255,255,0.08);
         }
 
         .nav-item svg {
-            width: 26px;
-            height: 26px;
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-item.active svg {
+            transform: scale(1.1);
         }
 
         /* Viewer */
@@ -336,35 +391,39 @@
 
         .swipe-card {
             width: 100%;
-            max-width: 320px;
-            aspect-ratio: 0.8;
-            background: var(--bg-card);
+            max-width: 300px;
+            aspect-ratio: 0.85;
+            background: linear-gradient(180deg, var(--bg-card) 0%, #0a0a0a 100%);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
+            border-radius: 20px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-                        opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                        opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                        box-shadow 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            animation: fadeInUp 0.5s ease forwards;
         }
 
         .swipe-card.swiping-left {
-            transform: translateX(-120px) rotate(-8deg);
+            transform: translateX(-150%) rotate(-12deg);
             opacity: 0;
         }
 
         .swipe-card.swiping-right {
-            transform: translateX(120px) rotate(8deg);
+            transform: translateX(150%) rotate(12deg);
             opacity: 0;
         }
 
         .swipe-card:active {
-            transform: scale(0.98);
+            transform: scale(0.97);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
         }
 
         .swipe-card-preview {
             flex: 1;
-            padding: 16px;
+            padding: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -376,31 +435,35 @@
         }
 
         .swipe-card-name {
-            font-size: 16px;
+            font-size: 15px;
+            font-weight: 500;
             text-align: center;
-            padding: 16px;
+            padding: 14px 16px;
             border-top: 1px solid var(--border-color);
+            background: rgba(0,0,0,0.2);
         }
 
         .swipe-nav {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            padding: 16px;
+            gap: 6px;
+            padding: 12px;
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 8px);
         }
 
         .swipe-dot {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             background: var(--border-color);
-            transition: background 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-                        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
         }
 
         .swipe-dot.active {
             background: var(--text-primary);
-            transform: scale(1.3);
+            transform: scale(1.2);
+            box-shadow: 0 0 8px rgba(255,255,255,0.3);
         }
 
         /* Detail View */
@@ -467,20 +530,22 @@
             display: flex;
             flex-direction: column;
             padding: 12px;
-            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 12px);
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
             overflow: hidden;
             min-height: 0;
+            gap: 10px;
         }
 
         .maker-canvas-container {
             flex: 1;
-            background: var(--bg-card);
+            background: linear-gradient(180deg, var(--bg-card) 0%, #0d0d0d 100%);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 16px;
             position: relative;
             overflow: hidden;
             touch-action: none;
             min-height: 0;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
         }
 
         .maker-canvas-container canvas {
@@ -489,15 +554,21 @@
         }
 
         .maker-input {
-            margin-top: 10px;
-            padding: 12px 14px;
+            padding: 14px 16px;
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 12px;
             color: var(--text-primary);
             font-size: 16px;
             width: 100%;
             flex-shrink: 0;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .maker-input:focus {
+            outline: none;
+            border-color: #444;
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
         }
 
         .maker-input::placeholder {
@@ -507,32 +578,38 @@
         .maker-actions {
             display: flex;
             gap: 10px;
-            margin-top: 10px;
             flex-shrink: 0;
         }
 
         .maker-btn {
             flex: 1;
-            padding: 14px 20px;
+            padding: 16px 20px;
             border: 1px solid var(--border-color);
             background: var(--bg-secondary);
             color: var(--text-primary);
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 500;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s ease, background 0.2s ease;
-            min-height: 50px;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            min-height: 52px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .maker-btn:active {
-            transform: scale(0.96);
+            transform: scale(0.95);
         }
 
         .maker-btn.primary {
-            background: var(--text-primary);
+            background: linear-gradient(135deg, #fff 0%, #e0e0e0 100%);
             color: var(--bg-primary);
-            border-color: var(--text-primary);
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(255,255,255,0.15);
+        }
+        
+        .maker-btn.primary:active {
+            box-shadow: 0 2px 6px rgba(255,255,255,0.1);
         }
 
         /* Axis labels */
@@ -626,7 +703,9 @@
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             display: flex;
             align-items: flex-end;
             justify-content: center;
@@ -643,13 +722,14 @@
         }
 
         .modal-content {
-            background: var(--bg-secondary);
-            border-radius: 16px 16px 0 0;
+            background: linear-gradient(180deg, #1a1a1a 0%, #111 100%);
+            border-radius: 20px 20px 0 0;
             width: 100%;
             max-width: 400px;
-            padding: 8px;
+            padding: 8px 12px 16px;
             transform: translateY(100%);
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border-top: 1px solid var(--border-color);
         }
 
         .modal-overlay.active .modal-content {
@@ -658,50 +738,57 @@
 
         .modal-header {
             text-align: center;
-            padding: 16px;
+            padding: 16px 12px;
             border-bottom: 1px solid var(--border-color);
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
 
         .modal-title {
-            font-size: 14px;
+            font-size: 13px;
             color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .modal-rename-section {
-            margin-bottom: 16px;
+            margin-bottom: 12px;
+            padding: 0 4px;
         }
 
         .modal-input {
             width: 100%;
-            padding: 14px;
-            background: var(--bg-secondary);
+            padding: 14px 16px;
+            background: var(--bg-primary);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 12px;
             color: var(--text-primary);
             font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .modal-input:focus {
             outline: none;
-            border-color: #555;
+            border-color: #444;
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
         }
 
         .modal-btn {
             width: 100%;
-            padding: 16px;
+            padding: 14px 16px;
             border: none;
             background: var(--bg-card);
             color: var(--text-primary);
-            font-size: 16px;
+            font-size: 15px;
+            font-weight: 500;
             border-radius: 12px;
             cursor: pointer;
             margin-bottom: 8px;
-            transition: background 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
-
+        
         .modal-btn:active {
-            background: var(--border-color);
+            transform: scale(0.97);
+            background: #1a1a1a;
         }
 
         .modal-btn.danger {
@@ -1420,9 +1507,11 @@
             await loadGraphs();
             const container = document.getElementById('best-choices');
             container.innerHTML = '';
+            cardIndex = 0;
             
             if (graphs.length === 0) {
                 container.innerHTML = '<div class="empty-state" style="grid-column: span 3; padding: 40px;"><p>No graphs yet</p></div>';
+                renderComparisonChart();
                 return;
             }
             
@@ -1602,9 +1691,12 @@
             }
         }
 
+        let cardIndex = 0;
+        
         function createGraphCard(graph) {
             const card = document.createElement('div');
             card.className = 'graph-card';
+            card.style.setProperty('--card-index', cardIndex++);
             card.innerHTML = `
                 <div class="graph-card-preview">
                     <canvas></canvas>
@@ -1872,6 +1964,7 @@
         function renderGalleryView() {
             const container = document.getElementById('gallery-view');
             container.innerHTML = '';
+            cardIndex = 0;
             
             if (graphs.length === 0) {
                 container.innerHTML = '<div class="empty-state" style="grid-column: span 3; padding: 40px;"><p>No graphs yet</p></div>';
@@ -2207,29 +2300,55 @@
             makerCtx.stroke();
         }
 
-        // Advanced line smoothing pipeline
+        // Line smoothing pipeline
         function smoothLine() {
             if (drawingPoints.length < 3) return;
             
-            // Step 0: Auto-complete line to graph boundaries if incomplete
-            drawingPoints = autoCompleteLine(drawingPoints);
+            const rect = makerCanvas.parentElement.getBoundingClientRect();
+            const padding = 30;
+            const leftX = padding;
+            const rightX = rect.width - padding;
+            const bottomY = rect.height - padding;
             
-            // Step 1: Apply moving average filter multiple times for initial smoothing
+            // Step 1: Apply moving average filter for initial smoothing
             let smoothed = drawingPoints;
-            for (let pass = 0; pass < 3; pass++) {
+            for (let pass = 0; pass < 2; pass++) {
                 smoothed = movingAverageSmooth(smoothed, 5);
             }
             
-            // Step 2: Simplify with RDP (higher epsilon = more simplification)
-            smoothed = rdpSimplify(smoothed, 8);
+            // Step 2: Simplify with RDP
+            smoothed = rdpSimplify(smoothed, 5);
             
-            // Step 3: Apply Chaikin's corner cutting for ultra-smooth curves
-            for (let i = 0; i < 4; i++) {
+            // Step 3: Apply Chaikin's corner cutting for smooth curves
+            for (let i = 0; i < 3; i++) {
                 smoothed = chaikinSmooth(smoothed);
             }
             
-            // Step 4: Final Catmull-Rom interpolation for perfectly smooth output
-            drawingPoints = catmullRomSpline(smoothed, 12);
+            // Step 4: Ensure line starts at left edge (x=0) at bottom (y=max)
+            if (smoothed.length > 0) {
+                const first = smoothed[0];
+                if (first.x > leftX + 5) {
+                    // Add starting point at origin (left edge, bottom)
+                    smoothed.unshift({ x: leftX, y: bottomY });
+                } else {
+                    // Snap first point to left edge
+                    smoothed[0] = { x: leftX, y: first.y };
+                }
+            }
+            
+            // Step 5: Ensure line ends at right edge
+            if (smoothed.length > 1) {
+                const last = smoothed[smoothed.length - 1];
+                if (last.x < rightX - 5) {
+                    // Extend to right edge maintaining trend
+                    smoothed.push({ x: rightX, y: last.y });
+                } else {
+                    // Snap last point to right edge
+                    smoothed[smoothed.length - 1] = { x: rightX, y: last.y };
+                }
+            }
+            
+            drawingPoints = smoothed;
         }
 
         // Auto-complete line to graph edges by extrapolating the trend
