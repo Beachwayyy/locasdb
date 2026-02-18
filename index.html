@@ -114,32 +114,56 @@
 
         /* Landing Page */
         .landing-header {
-            padding: 40px 24px 24px;
+            padding: 32px 24px 16px;
             text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .landing-logo {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
         }
 
         .landing-logo svg {
-            opacity: 0.7;
+            opacity: 0.8;
         }
 
         .landing-title {
-            font-size: 28px;
-            font-weight: 300;
-            letter-spacing: 2px;
+            font-size: 24px;
+            font-weight: 400;
+            letter-spacing: 1px;
         }
 
         .section-title {
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 600;
             color: var(--text-secondary);
-            padding: 16px 24px 12px;
+            padding: 12px 24px 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .comparison-chart-container {
+            margin: 0 24px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            aspect-ratio: 1.2;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .comparison-chart-container canvas {
+            width: 100%;
+            height: 100%;
         }
 
         .content {
@@ -157,7 +181,7 @@
         }
 
         .graph-card {
-            aspect-ratio: 1;
+            aspect-ratio: 0.9;
             background: linear-gradient(145deg, var(--bg-card) 0%, #121212 100%);
             border: 1px solid var(--border-color);
             border-radius: 12px;
@@ -193,14 +217,16 @@
         }
 
         .graph-card-name {
-            font-size: 11px;
+            font-size: 10px;
             text-align: center;
-            padding: 6px 4px;
+            padding: 4px 6px;
             color: var(--text-secondary);
-            border-top: 1px solid var(--border-color);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            flex-shrink: 0;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-card);
         }
 
         /* Bottom Navigation */
@@ -216,10 +242,12 @@
             padding-bottom: calc(8px + var(--safe-bottom));
             padding-left: var(--safe-left);
             padding-right: var(--safe-right);
-            background: var(--bg-primary);
+            background: linear-gradient(180deg, rgba(10,10,10,0.95) 0%, rgba(5,5,5,0.98) 100%);
             border-top: 1px solid var(--border-color);
             height: calc(var(--nav-height) + var(--safe-bottom));
             z-index: 100;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .nav-item {
@@ -874,12 +902,16 @@
         <div id="landing-screen" class="screen active">
             <div class="landing-header">
                 <div class="landing-logo">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M3 3v18h18"/>
                         <path d="M6 17l5-7 4 4 5-8"/>
                     </svg>
                 </div>
                 <h1 class="landing-title">LocasDB</h1>
+            </div>
+            <div class="section-title">Comparison Chart</div>
+            <div class="comparison-chart-container">
+                <canvas id="comparison-canvas"></canvas>
             </div>
             <div class="section-title">Best Choices</div>
             <div class="content">
@@ -1398,6 +1430,176 @@
                 const card = createGraphCard(graph);
                 container.appendChild(card);
             });
+            
+            renderComparisonChart();
+        }
+        
+        function renderComparisonChart() {
+            const canvas = document.getElementById('comparison-canvas');
+            if (!canvas) return;
+            
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+            
+            const w = rect.width;
+            const h = rect.height;
+            const padding = 40;
+            
+            ctx.clearRect(0, 0, w, h);
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            
+            // Y axis (Crazy/Loca)
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, h - padding);
+            ctx.stroke();
+            
+            // X axis (Hot/Bonita)
+            ctx.beginPath();
+            ctx.moveTo(padding, h - padding);
+            ctx.lineTo(w - padding, h - padding);
+            ctx.stroke();
+            
+            // Axis labels
+            ctx.fillStyle = '#666';
+            ctx.font = '10px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Bonita →', w / 2, h - 8);
+            
+            ctx.save();
+            ctx.translate(12, h / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Loca →', 0, 0);
+            ctx.restore();
+            
+            // Draw ideal zone (wife zone: high hot, medium crazy)
+            const graphW = w - padding * 2;
+            const graphH = h - padding * 2;
+            
+            ctx.fillStyle = 'rgba(74, 222, 128, 0.1)';
+            ctx.beginPath();
+            ctx.moveTo(padding + graphW * 0.7, h - padding);
+            ctx.lineTo(w - padding, h - padding);
+            ctx.lineTo(w - padding, padding + graphH * 0.3);
+            ctx.lineTo(padding + graphW * 0.7, padding + graphH * 0.5);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.fillStyle = 'rgba(74, 222, 128, 0.3)';
+            ctx.font = '9px -apple-system, sans-serif';
+            ctx.fillText('IDEAL', padding + graphW * 0.85, padding + graphH * 0.4);
+            
+            // Draw diagonal line (hot-crazy line)
+            ctx.strokeStyle = 'rgba(255, 100, 100, 0.3)';
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(padding, h - padding);
+            ctx.lineTo(w - padding, padding);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            if (graphs.length === 0) {
+                ctx.fillStyle = '#555';
+                ctx.font = '12px -apple-system, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Add graphs to see comparison', w / 2, h / 2);
+                return;
+            }
+            
+            // Calculate average position for each graph and plot as scatter points
+            const colors = ['#4ade80', '#60a5fa', '#f472b6', '#facc15', '#a78bfa', '#fb923c', '#22d3d8', '#e879f9'];
+            
+            graphs.forEach((graph, i) => {
+                if (!graph.points || graph.points.length < 2) return;
+                
+                // Calculate average x (hot) and y (crazy) for this graph
+                let avgX = 0, avgY = 0;
+                graph.points.forEach(p => {
+                    avgX += p.x;
+                    avgY += p.y;
+                });
+                avgX /= graph.points.length;
+                avgY /= graph.points.length;
+                
+                // Convert to canvas coordinates
+                const plotX = padding + avgX * graphW;
+                const plotY = padding + (1 - avgY) * graphH;
+                
+                const color = colors[i % colors.length];
+                
+                // Draw point with glow
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 8;
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(plotX, plotY, 6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                
+                // Draw name label
+                ctx.fillStyle = '#fff';
+                ctx.font = '9px -apple-system, sans-serif';
+                ctx.textAlign = 'center';
+                const labelY = plotY - 12;
+                ctx.fillText(graph.name.substring(0, 8), plotX, labelY < padding + 10 ? plotY + 16 : labelY);
+            });
+            
+            // Find and highlight the best fit (highest x, moderate y around 0.4-0.6)
+            let bestGraph = null;
+            let bestScore = -Infinity;
+            
+            graphs.forEach(graph => {
+                if (!graph.points || graph.points.length < 2) return;
+                
+                let avgX = 0, avgY = 0;
+                graph.points.forEach(p => {
+                    avgX += p.x;
+                    avgY += p.y;
+                });
+                avgX /= graph.points.length;
+                avgY /= graph.points.length;
+                
+                // Score: high x is good, y around 0.4-0.5 is ideal (controlled crazy)
+                const yPenalty = Math.abs(avgY - 0.45) * 2;
+                const score = avgX - yPenalty;
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestGraph = graph;
+                }
+            });
+            
+            if (bestGraph) {
+                let avgX = 0, avgY = 0;
+                bestGraph.points.forEach(p => {
+                    avgX += p.x;
+                    avgY += p.y;
+                });
+                avgX /= bestGraph.points.length;
+                avgY /= bestGraph.points.length;
+                
+                const plotX = padding + avgX * graphW;
+                const plotY = padding + (1 - avgY) * graphH;
+                
+                // Draw crown/star indicator for best
+                ctx.strokeStyle = '#facc15';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(plotX, plotY, 12, 0, Math.PI * 2);
+                ctx.stroke();
+            }
         }
 
         function createGraphCard(graph) {
