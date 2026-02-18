@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LocasDB">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="description" content="Track and compare with custom graphs">
+    <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22LocasDB%22%2C%22short_name%22%3A%22LocasDB%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230a0a0a%22%2C%22theme_color%22%3A%22%230a0a0a%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520100%2520100%27%253E%253Crect%2520fill%3D%27%25230a0a0a%27%2520width%3D%27100%27%2520height%3D%27100%27%2520rx%3D%2720%27%2F%253E%253Cpath%2520d%3D%27M20%252070%2520L50%252030%2520L80%252050%27%2520stroke%3D%27%2523fff%27%2520stroke-width%3D%274%27%2520fill%3D%27none%27%2F%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+    <title>LocasDB</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0a' width='100' height='100' rx='20'/><path d='M20 70 L50 30 L80 50' stroke='%23fff' stroke-width='4' fill='none'/></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #151515;
+            --border-color: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --accent: #3a3a3a;
+            --graph-line: #ffffff;
+            --graph-special: #ff6b6b;
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .app {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .screen.active {
+            display: flex;
+            animation: screenIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes screenIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            position: relative;
+            min-height: 44px;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .header-back {
+            position: absolute;
+            left: 16px;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .header-icon {
+            position: absolute;
+            right: 16px;
+            opacity: 0.6;
+        }
+
+        /* Landing Page */
+        .landing-header {
+            padding: 40px 24px 24px;
+            text-align: left;
+        }
+
+        .landing-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .landing-logo svg {
+            opacity: 0.7;
+        }
+
+        .landing-title {
+            font-size: 32px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            padding: 16px 24px 12px;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 80px;
+        }
+
+        /* Graph Grid */
+        .graph-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 0 24px;
+        }
+
+        .graph-card {
+            aspect-ratio: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                        border-color 0.3s ease,
+                        box-shadow 0.3s ease;
+        }
+
+        .graph-card:hover {
+            border-color: #3a3a3a;
+        }
+
+        .graph-card:active {
+            transform: scale(0.97);
+        }
+
+        .graph-card-preview {
+            flex: 1;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .graph-card-preview canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .graph-card-name {
+            font-size: 11px;
+            text-align: center;
+            padding: 6px 4px;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0;
+            padding-bottom: calc(8px + var(--safe-bottom));
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .nav-item.active {
+            color: var(--text-primary);
+        }
+
+        .nav-item:active {
+            transform: scale(0.92);
+        }
+
+        .nav-item svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Viewer */
+        .viewer-toggle {
+            display: flex;
+            margin: 0 auto 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .viewer-toggle button {
+            padding: 8px 24px;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                        color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .viewer-toggle button.active {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .viewer-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 0 16px;
+        }
+
+        .swipe-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .swipe-card {
+            width: 100%;
+            max-width: 320px;
+            aspect-ratio: 0.8;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                        opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .swipe-card.swiping-left {
+            transform: translateX(-80px) rotate(-3deg);
+            opacity: 0;
+        }
+
+        .swipe-card.swiping-right {
+            transform: translateX(80px) rotate(3deg);
+            opacity: 0;
+        }
+
+        .swipe-card-preview {
+            flex: 1;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .swipe-card-preview canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .swipe-card-name {
+            font-size: 16px;
+            text-align: center;
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .swipe-nav {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px;
+        }
+
+        .swipe-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--border-color);
+            transition: background 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .swipe-dot.active {
+            background: var(--text-primary);
+            transform: scale(1.3);
+        }
+
+        /* Detail View */
+        .detail-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+        }
+
+        .detail-graph {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .detail-graph canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .detail-name {
+            text-align: center;
+            padding: 16px;
+            font-size: 18px;
+        }
+
+        .detail-actions {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            padding: 16px;
+        }
+
+        .detail-btn {
+            padding: 12px 24px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                        background 0.3s ease,
+                        border-color 0.3s ease;
+        }
+
+        .detail-btn:active {
+            transform: scale(0.96);
+        }
+
+        .detail-btn.danger {
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+
+        /* Maker */
+        .maker-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .maker-canvas-container {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+            min-height: 0;
+        }
+
+        .maker-canvas-container canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .maker-input {
+            margin-top: 10px;
+            padding: 12px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        .maker-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .maker-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-shrink: 0;
+        }
+
+        .maker-btn {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                        background 0.3s ease;
+        }
+
+        .maker-btn:active {
+            transform: scale(0.96);
+        }
+
+        .maker-btn.primary {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border-color: var(--text-primary);
+        }
+
+        /* Axis labels */
+        .axis-label {
+            position: absolute;
+            font-size: 9px;
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .axis-y {
+            left: 6px;
+            top: 50%;
+            transform: rotate(-90deg) translateX(-50%);
+            transform-origin: left center;
+        }
+
+        .axis-x {
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Empty state */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            gap: 16px;
+        }
+
+        .empty-state svg {
+            opacity: 0.3;
+        }
+
+        /* Zone overlay toggle */
+        .zone-toggle {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 6px 12px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            cursor: pointer;
+            z-index: 10;
+            transition: color 0.3s ease,
+                        border-color 0.3s ease,
+                        background 0.3s ease,
+                        transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .zone-toggle:active {
+            transform: scale(0.94);
+        }
+
+        .zone-toggle.active {
+            color: var(--text-primary);
+            border-color: var(--text-primary);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .header-back {
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .header-back:active {
+            transform: scale(0.9);
+        }
+
+        .content {
+            scroll-behavior: smooth;
+        }
+
+        .maker-input {
+            transition: border-color 0.3s ease;
+        }
+
+        .maker-input:focus {
+            border-color: #444;
+            outline: none;
+        }
+
+        /* Context Menu Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            padding-bottom: var(--safe-bottom);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 16px 16px 0 0;
+            width: 100%;
+            max-width: 400px;
+            padding: 8px;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            text-align: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 8px;
+        }
+
+        .modal-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+            margin-bottom: 8px;
+            transition: border-color 0.3s ease;
+        }
+
+        .modal-input:focus {
+            border-color: #444;
+            outline: none;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .modal-btn:active {
+            background: var(--border-color);
+        }
+
+        .modal-btn.danger {
+            color: #ff4444;
+        }
+
+        .modal-btn.cancel {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Landing Screen -->
+        <div id="landing-screen" class="screen active">
+            <div class="landing-header">
+                <div class="landing-logo">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 3v18h18"/>
+                        <path d="M6 17l5-7 4 4 5-8"/>
+                    </svg>
+                </div>
+                <h1 class="landing-title">LocasDB</h1>
+            </div>
+            <div class="section-title">Best Choices</div>
+            <div class="content">
+                <div id="best-choices" class="graph-grid"></div>
+            </div>
+            <nav class="bottom-nav">
+                <button class="nav-item active" data-screen="landing">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="viewer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 3v18h18"/>
+                        <path d="M6 17l5-7 4 4 5-8"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="maker">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Viewer Screen -->
+        <div id="viewer-screen" class="screen">
+            <div class="header">
+                <h2 class="header-title">Viewer</h2>
+            </div>
+            <div class="viewer-toggle">
+                <button id="swipe-mode" class="active">Swipe</button>
+                <button id="gallery-mode">Gallery</button>
+            </div>
+            <div class="content">
+                <div id="swipe-view" class="swipe-container">
+                    <div class="swipe-card">
+                        <div class="swipe-card-preview">
+                            <canvas id="swipe-canvas"></canvas>
+                        </div>
+                        <div id="swipe-name" class="swipe-card-name">-</div>
+                    </div>
+                </div>
+                <div id="gallery-view" class="viewer-gallery" style="display: none;"></div>
+            </div>
+            <div id="swipe-dots" class="swipe-nav"></div>
+            <nav class="bottom-nav">
+                <button class="nav-item" data-screen="landing">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                    </svg>
+                </button>
+                <button class="nav-item active" data-screen="viewer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 3v18h18"/>
+                        <path d="M6 17l5-7 4 4 5-8"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="maker">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Detail Screen -->
+        <div id="detail-screen" class="screen">
+            <div class="header">
+                <button class="header-back" onclick="goBack()">&larr;</button>
+                <h2 class="header-title">Select a graph</h2>
+            </div>
+            <div class="detail-container">
+                <div class="detail-graph">
+                    <button id="zone-toggle" class="zone-toggle" onclick="toggleZones()">Zones</button>
+                    <canvas id="detail-canvas"></canvas>
+                    <span class="axis-label axis-y">Psicopatía</span>
+                    <span class="axis-label axis-x">Looks</span>
+                </div>
+                <div id="detail-name" class="detail-name">-</div>
+            </div>
+            <nav class="bottom-nav">
+                <button class="nav-item" data-screen="landing">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                    </svg>
+                </button>
+                <button class="nav-item active" data-screen="viewer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 3v18h18"/>
+                        <path d="M6 17l5-7 4 4 5-8"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="maker">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Maker Screen -->
+        <div id="maker-screen" class="screen">
+            <div class="header">
+                <button class="header-back" onclick="showScreen('landing')">&larr;</button>
+                <h2 class="header-title">Maker</h2>
+            </div>
+            <div class="maker-container">
+                <div class="maker-canvas-container">
+                    <canvas id="maker-canvas"></canvas>
+                    <span class="axis-label axis-y">Psicopatía</span>
+                    <span class="axis-label axis-x">Looks</span>
+                </div>
+                <input type="text" id="graph-name" class="maker-input" placeholder="Name the graph">
+                <div class="maker-actions">
+                    <button class="maker-btn" onclick="clearCanvas()">Clear</button>
+                    <button class="maker-btn primary" onclick="saveGraph()">Save</button>
+                </div>
+            </div>
+            <nav class="bottom-nav">
+                <button class="nav-item" data-screen="landing">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="viewer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 3v18h18"/>
+                        <path d="M6 17l5-7 4 4 5-8"/>
+                    </svg>
+                </button>
+                <button class="nav-item active" data-screen="maker">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="settings-screen" class="screen">
+            <div class="header">
+                <h2 class="header-title">Transfer</h2>
+            </div>
+            <div class="content" style="padding: 24px;">
+                <p style="color: var(--text-secondary); margin-bottom: 24px;">Export or import your graphs to transfer between devices</p>
+                <button class="maker-btn" onclick="exportData()" style="margin-bottom: 12px;">Export Data</button>
+                <button class="maker-btn" onclick="document.getElementById('import-file').click()">Import Data</button>
+                <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)">
+                <p style="color: var(--text-secondary); font-size: 11px; margin-top: 24px;">Hold any graph card for rename/delete options</p>
+                <a href="https://instagram.com/aurelioharmsen" target="_blank" style="display: block; color: var(--text-secondary); font-size: 12px; margin-top: 16px; text-decoration: none;">Made by @aurelioharmsen</a>
+            </div>
+            <nav class="bottom-nav">
+                <button class="nav-item" data-screen="landing">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="viewer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 3v18h18"/>
+                        <path d="M6 17l5-7 4 4 5-8"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="maker">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                </button>
+                <button class="nav-item active" data-screen="settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Context Menu Modal -->
+        <div id="context-modal" class="modal-overlay" onclick="closeModal(event)">
+            <div class="modal-content" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <div class="modal-title" id="modal-graph-name">Graph Options</div>
+                </div>
+                <input type="text" id="rename-input" class="modal-input" placeholder="Enter new name">
+                <button class="modal-btn" onclick="saveRename()">Save Name</button>
+                <button class="modal-btn" onclick="toggleStar()" id="star-btn">⭐ Star Graph</button>
+                <button class="modal-btn" onclick="editGraph()">✏️ Edit Graph</button>
+                <button class="modal-btn danger" onclick="confirmDelete()">Delete Graph</button>
+                <button class="modal-btn cancel" onclick="hideModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // IndexedDB Setup
+        let db;
+        const DB_NAME = 'LocasDB';
+        const STORE_NAME = 'graphs';
+
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (e) => {
+                    const database = e.target.result;
+                    if (!database.objectStoreNames.contains(STORE_NAME)) {
+                        const store = database.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                        store.createIndex('name', 'name', { unique: false });
+                        store.createIndex('timestamp', 'timestamp', { unique: false });
+                    }
+                };
+            });
+        }
+
+        function getAllGraphs() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.getAll();
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function saveGraphToDB(graphData) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.add(graphData);
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function deleteGraphFromDB(id) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.delete(id);
+                
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function updateGraphInDB(graphData) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.put(graphData);
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // App State
+        let graphs = [];
+        let currentGraphIndex = 0;
+        let currentDetailGraph = null;
+        let showZones = false;
+        let drawingPoints = [];
+        let isDrawing = false;
+        let previousScreen = 'landing';
+        let longPressTimer = null;
+        let contextMenuGraph = null;
+
+        // Screen Navigation
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId + '-screen').classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll(`.nav-item[data-screen="${screenId}"]`).forEach(n => n.classList.add('active'));
+            
+            if (screenId === 'landing') {
+                renderBestChoices();
+            } else if (screenId === 'viewer') {
+                renderViewer();
+            } else if (screenId === 'maker') {
+                initMakerCanvas();
+            }
+        }
+
+        function goBack() {
+            showScreen(previousScreen);
+        }
+
+        // Navigation Event Listeners
+        document.querySelectorAll('.nav-item').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const screen = btn.dataset.screen;
+                if (screen) showScreen(screen);
+            });
+        });
+
+        // Viewer Mode Toggle
+        document.getElementById('swipe-mode').addEventListener('click', () => {
+            document.getElementById('swipe-mode').classList.add('active');
+            document.getElementById('gallery-mode').classList.remove('active');
+            document.getElementById('swipe-view').style.display = 'flex';
+            document.getElementById('gallery-view').style.display = 'none';
+            document.getElementById('swipe-dots').style.display = 'flex';
+            renderSwipeView();
+        });
+
+        document.getElementById('gallery-mode').addEventListener('click', () => {
+            document.getElementById('gallery-mode').classList.add('active');
+            document.getElementById('swipe-mode').classList.remove('active');
+            document.getElementById('swipe-view').style.display = 'none';
+            document.getElementById('gallery-view').style.display = 'grid';
+            document.getElementById('swipe-dots').style.display = 'none';
+            renderGalleryView();
+        });
+
+        // Render Functions
+        async function loadGraphs() {
+            graphs = await getAllGraphs();
+            // Sort: starred first, then by timestamp
+            graphs.sort((a, b) => {
+                if (a.starred && !b.starred) return -1;
+                if (!a.starred && b.starred) return 1;
+                return b.timestamp - a.timestamp;
+            });
+        }
+
+        async function renderBestChoices() {
+            await loadGraphs();
+            const container = document.getElementById('best-choices');
+            container.innerHTML = '';
+            
+            if (graphs.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="grid-column: span 3; padding: 40px;"><p>No graphs yet</p></div>';
+                return;
+            }
+            
+            graphs.slice(0, 6).forEach(graph => {
+                const card = createGraphCard(graph);
+                container.appendChild(card);
+            });
+        }
+
+        function createGraphCard(graph) {
+            const card = document.createElement('div');
+            card.className = 'graph-card';
+            card.innerHTML = `
+                <div class="graph-card-preview">
+                    <canvas></canvas>
+                </div>
+                <div class="graph-card-name">${graph.name}</div>
+            `;
+            
+            let pressTimer = null;
+            let didLongPress = false;
+            
+            const startPress = (e) => {
+                didLongPress = false;
+                pressTimer = setTimeout(() => {
+                    didLongPress = true;
+                    showContextMenu(graph);
+                    if (navigator.vibrate) navigator.vibrate(50);
+                }, 500);
+            };
+            
+            const endPress = (e) => {
+                clearTimeout(pressTimer);
+                if (!didLongPress) {
+                    openDetail(graph);
+                }
+            };
+            
+            const cancelPress = () => {
+                clearTimeout(pressTimer);
+            };
+            
+            card.addEventListener('touchstart', startPress, { passive: true });
+            card.addEventListener('touchend', endPress);
+            card.addEventListener('touchmove', cancelPress);
+            card.addEventListener('mousedown', startPress);
+            card.addEventListener('mouseup', endPress);
+            card.addEventListener('mouseleave', cancelPress);
+            
+            setTimeout(() => {
+                const canvas = card.querySelector('canvas');
+                drawGraphPreview(canvas, graph.points, false);
+            }, 10);
+            
+            return card;
+        }
+
+        // Context Menu Functions
+        function showContextMenu(graph) {
+            contextMenuGraph = graph;
+            document.getElementById('modal-graph-name').textContent = graph.name;
+            document.getElementById('rename-input').value = graph.name;
+            document.getElementById('star-btn').textContent = graph.starred ? '⭐ Unstar Graph' : '⭐ Star Graph';
+            document.getElementById('context-modal').classList.add('active');
+        }
+
+        function hideModal() {
+            document.getElementById('context-modal').classList.remove('active');
+            contextMenuGraph = null;
+        }
+
+        function closeModal(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                // Auto-save name if changed
+                const input = document.getElementById('rename-input');
+                if (contextMenuGraph && input.value.trim() && input.value.trim() !== contextMenuGraph.name) {
+                    saveRename();
+                } else {
+                    hideModal();
+                }
+            }
+        }
+
+        async function saveRename() {
+            if (!contextMenuGraph) return;
+            
+            const newName = document.getElementById('rename-input').value.trim();
+            if (!newName) {
+                hideModal();
+                return;
+            }
+            
+            contextMenuGraph.name = newName;
+            await updateGraphInDB(contextMenuGraph);
+            
+            hideModal();
+            
+            // Refresh current view
+            const activeScreen = document.querySelector('.screen.active').id;
+            if (activeScreen === 'landing-screen') {
+                renderBestChoices();
+            } else if (activeScreen === 'viewer-screen') {
+                renderViewer();
+            } else if (activeScreen === 'detail-screen') {
+                document.getElementById('detail-name').textContent = newName;
+            }
+        }
+
+        async function confirmDelete() {
+            if (!contextMenuGraph) return;
+            
+            hideModal();
+            
+            // Show delete confirmation
+            setTimeout(async () => {
+                if (confirm(`Delete "${contextMenuGraph.name}"?`)) {
+                    await deleteGraphFromDB(contextMenuGraph.id);
+                    
+                    // Refresh current view
+                    const activeScreen = document.querySelector('.screen.active').id;
+                    if (activeScreen === 'detail-screen') {
+                        goBack();
+                    } else {
+                        renderBestChoices();
+                        renderViewer();
+                    }
+                }
+            }, 100);
+        }
+
+        async function toggleStar() {
+            if (!contextMenuGraph) return;
+            
+            contextMenuGraph.starred = !contextMenuGraph.starred;
+            await updateGraphInDB(contextMenuGraph);
+            
+            // Update button text
+            document.getElementById('star-btn').textContent = contextMenuGraph.starred ? '⭐ Unstar Graph' : '⭐ Star Graph';
+            
+            // Refresh views
+            renderBestChoices();
+        }
+
+        let editingGraphId = null;
+
+        function editGraph() {
+            if (!contextMenuGraph) return;
+            
+            editingGraphId = contextMenuGraph.id;
+            hideModal();
+            
+            // Go to maker screen with existing points loaded
+            showScreen('maker');
+            
+            // Load the graph data into maker
+            setTimeout(() => {
+                document.getElementById('graph-name').value = contextMenuGraph.name;
+                
+                // Convert normalized points back to canvas coordinates
+                const rect = makerCanvas.parentElement.getBoundingClientRect();
+                const padding = 30;
+                const graphW = rect.width - padding * 2;
+                const graphH = rect.height - padding * 2;
+                
+                drawingPoints = contextMenuGraph.points.map(p => ({
+                    x: padding + p.x * graphW,
+                    y: padding + (1 - p.y) * graphH
+                }));
+                
+                redrawMaker();
+            }, 100);
+        }
+
+        function renderViewer() {
+            loadGraphs().then(() => {
+                if (document.getElementById('swipe-mode').classList.contains('active')) {
+                    renderSwipeView();
+                } else {
+                    renderGalleryView();
+                }
+            });
+        }
+
+        function renderSwipeView() {
+            const dotsContainer = document.getElementById('swipe-dots');
+            dotsContainer.innerHTML = '';
+            
+            if (graphs.length === 0) {
+                document.getElementById('swipe-name').textContent = 'No graphs';
+                return;
+            }
+            
+            graphs.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'swipe-dot' + (i === currentGraphIndex ? ' active' : '');
+                dot.addEventListener('click', () => {
+                    currentGraphIndex = i;
+                    renderSwipeView();
+                });
+                dotsContainer.appendChild(dot);
+            });
+            
+            const graph = graphs[currentGraphIndex];
+            document.getElementById('swipe-name').textContent = graph.name;
+            
+            const canvas = document.getElementById('swipe-canvas');
+            drawGraphPreview(canvas, graph.points, false);
+            
+            // Swipe gestures
+            const swipeCard = document.querySelector('.swipe-card');
+            let startX = 0;
+            
+            swipeCard.ontouchstart = (e) => {
+                startX = e.touches[0].clientX;
+            };
+            
+            swipeCard.ontouchend = (e) => {
+                const endX = e.changedTouches[0].clientX;
+                const diff = startX - endX;
+                
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0 && currentGraphIndex < graphs.length - 1) {
+                        currentGraphIndex++;
+                    } else if (diff < 0 && currentGraphIndex > 0) {
+                        currentGraphIndex--;
+                    }
+                    renderSwipeView();
+                }
+            };
+            
+            swipeCard.onclick = () => openDetail(graph);
+        }
+
+        function renderGalleryView() {
+            const container = document.getElementById('gallery-view');
+            container.innerHTML = '';
+            
+            if (graphs.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="grid-column: span 3; padding: 40px;"><p>No graphs yet</p></div>';
+                return;
+            }
+            
+            graphs.forEach(graph => {
+                const card = createGraphCard(graph);
+                container.appendChild(card);
+            });
+        }
+
+        // Detail View
+        function openDetail(graph) {
+            currentDetailGraph = graph;
+            previousScreen = document.querySelector('.screen.active').id.replace('-screen', '');
+            document.getElementById('detail-name').textContent = graph.name;
+            showScreen('detail');
+            
+            setTimeout(() => {
+                const canvas = document.getElementById('detail-canvas');
+                drawGraphPreview(canvas, graph.points, showZones);
+            }, 50);
+        }
+
+        function toggleZones() {
+            showZones = !showZones;
+            document.getElementById('zone-toggle').classList.toggle('active', showZones);
+            
+            const canvas = document.getElementById('detail-canvas');
+            drawGraphPreview(canvas, currentDetailGraph.points, showZones);
+        }
+
+        // Graph Drawing
+        function drawGraphPreview(canvas, points, withZones) {
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+            
+            const w = rect.width;
+            const h = rect.height;
+            const padding = 30;
+            
+            ctx.clearRect(0, 0, w, h);
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            
+            // Y axis
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, h - padding);
+            ctx.stroke();
+            
+            // X axis
+            ctx.beginPath();
+            ctx.moveTo(padding, h - padding);
+            ctx.lineTo(w - padding, h - padding);
+            ctx.stroke();
+            
+            // Arrows
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding - 5, padding + 10);
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding + 5, padding + 10);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(w - padding, h - padding);
+            ctx.lineTo(w - padding - 10, h - padding - 5);
+            ctx.moveTo(w - padding, h - padding);
+            ctx.lineTo(w - padding - 10, h - padding + 5);
+            ctx.stroke();
+            
+            // Zone overlays
+            if (withZones) {
+                const graphW = w - padding * 2;
+                const graphH = h - padding * 2;
+                
+                ctx.strokeStyle = '#444';
+                ctx.setLineDash([5, 5]);
+                ctx.lineWidth = 1;
+                
+                // Horizontal line at crazy = 5 (middle)
+                const y5 = padding + graphH * 0.5;
+                ctx.beginPath();
+                ctx.moveTo(padding, y5);
+                ctx.lineTo(w - padding, y5);
+                ctx.stroke();
+                
+                // Diagonal line (hot-crazy line)
+                ctx.beginPath();
+                ctx.moveTo(padding, h - padding);
+                ctx.lineTo(w - padding, padding);
+                ctx.stroke();
+                
+                // Vertical line at hot = 5
+                const x5 = padding + graphW * 0.5;
+                ctx.beginPath();
+                ctx.moveTo(x5, padding);
+                ctx.lineTo(x5, h - padding);
+                ctx.stroke();
+                
+                // Vertical line at hot = 8
+                const x8 = padding + graphW * 0.8;
+                ctx.beginPath();
+                ctx.moveTo(x8, padding);
+                ctx.lineTo(x8, h - padding);
+                ctx.stroke();
+                
+                ctx.setLineDash([]);
+                
+                // Zone labels
+                ctx.fillStyle = '#555';
+                ctx.font = '10px -apple-system, sans-serif';
+                ctx.fillText('NO GO', padding + 10, padding + 30);
+                ctx.fillText('DANGER', padding + graphW * 0.3, padding + 20);
+                ctx.fillText('FUN', padding + graphW * 0.5 + 5, padding + graphH * 0.5 - 10);
+                ctx.fillText('DATE', padding + graphW * 0.7, padding + graphH * 0.3);
+                ctx.fillText('WIFE', padding + graphW * 0.8 + 5, padding + graphH * 0.6);
+                ctx.fillText('UNICORNS', padding + graphW * 0.8 + 5, h - padding - 15);
+            }
+            
+            // Draw the line
+            if (points && points.length > 1) {
+                const graphW = w - padding * 2;
+                const graphH = h - padding * 2;
+                
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                
+                const scaledPoints = points.map(p => ({
+                    x: padding + p.x * graphW,
+                    y: padding + (1 - p.y) * graphH
+                }));
+                
+                ctx.moveTo(scaledPoints[0].x, scaledPoints[0].y);
+                
+                for (let i = 1; i < scaledPoints.length; i++) {
+                    ctx.lineTo(scaledPoints[i].x, scaledPoints[i].y);
+                }
+                
+                ctx.stroke();
+            }
+        }
+
+        // Maker Canvas
+        let makerCanvas, makerCtx;
+
+        function initMakerCanvas() {
+            drawingPoints = [];
+            document.getElementById('graph-name').value = '';
+            
+            const container = document.querySelector('.maker-canvas-container');
+            makerCanvas = document.getElementById('maker-canvas');
+            
+            const rect = container.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            makerCanvas.width = rect.width * dpr;
+            makerCanvas.height = rect.height * dpr;
+            makerCanvas.style.width = rect.width + 'px';
+            makerCanvas.style.height = rect.height + 'px';
+            
+            makerCtx = makerCanvas.getContext('2d');
+            makerCtx.scale(dpr, dpr);
+            
+            drawMakerBackground();
+            
+            // Touch events
+            makerCanvas.ontouchstart = handleTouchStart;
+            makerCanvas.ontouchmove = handleTouchMove;
+            makerCanvas.ontouchend = handleTouchEnd;
+            
+            // Mouse events (for testing)
+            makerCanvas.onmousedown = handleMouseDown;
+            makerCanvas.onmousemove = handleMouseMove;
+            makerCanvas.onmouseup = handleMouseUp;
+        }
+
+        function drawMakerBackground() {
+            const rect = makerCanvas.parentElement.getBoundingClientRect();
+            const w = rect.width;
+            const h = rect.height;
+            const padding = 30;
+            
+            makerCtx.clearRect(0, 0, w, h);
+            
+            // Grid
+            makerCtx.strokeStyle = '#222';
+            makerCtx.lineWidth = 0.5;
+            
+            const gridSize = 20;
+            for (let x = padding; x <= w - padding; x += gridSize) {
+                makerCtx.beginPath();
+                makerCtx.moveTo(x, padding);
+                makerCtx.lineTo(x, h - padding);
+                makerCtx.stroke();
+            }
+            for (let y = padding; y <= h - padding; y += gridSize) {
+                makerCtx.beginPath();
+                makerCtx.moveTo(padding, y);
+                makerCtx.lineTo(w - padding, y);
+                makerCtx.stroke();
+            }
+            
+            // Axes
+            makerCtx.strokeStyle = '#444';
+            makerCtx.lineWidth = 1;
+            
+            makerCtx.beginPath();
+            makerCtx.moveTo(padding, padding);
+            makerCtx.lineTo(padding, h - padding);
+            makerCtx.lineTo(w - padding, h - padding);
+            makerCtx.stroke();
+            
+            // Arrows
+            makerCtx.beginPath();
+            makerCtx.moveTo(padding, padding);
+            makerCtx.lineTo(padding - 5, padding + 10);
+            makerCtx.moveTo(padding, padding);
+            makerCtx.lineTo(padding + 5, padding + 10);
+            makerCtx.stroke();
+            
+            makerCtx.beginPath();
+            makerCtx.moveTo(w - padding, h - padding);
+            makerCtx.lineTo(w - padding - 10, h - padding - 5);
+            makerCtx.moveTo(w - padding, h - padding);
+            makerCtx.lineTo(w - padding - 10, h - padding + 5);
+            makerCtx.stroke();
+        }
+
+        function getCanvasPoint(e) {
+            const rect = makerCanvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            return { x, y };
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            isDrawing = true;
+            drawingPoints = [];
+            const point = getCanvasPoint(e);
+            drawingPoints.push(point);
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const point = getCanvasPoint(e);
+            drawingPoints.push(point);
+            redrawMaker();
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            isDrawing = false;
+            smoothLine();
+            redrawMaker();
+        }
+
+        function handleMouseDown(e) {
+            isDrawing = true;
+            drawingPoints = [];
+            const point = getCanvasPoint(e);
+            drawingPoints.push(point);
+        }
+
+        function handleMouseMove(e) {
+            if (!isDrawing) return;
+            const point = getCanvasPoint(e);
+            drawingPoints.push(point);
+            redrawMaker();
+        }
+
+        function handleMouseUp(e) {
+            isDrawing = false;
+            smoothLine();
+            redrawMaker();
+        }
+
+        function redrawMaker() {
+            drawMakerBackground();
+            
+            if (drawingPoints.length < 2) return;
+            
+            makerCtx.strokeStyle = '#fff';
+            makerCtx.lineWidth = 2;
+            makerCtx.lineCap = 'round';
+            makerCtx.lineJoin = 'round';
+            makerCtx.beginPath();
+            makerCtx.moveTo(drawingPoints[0].x, drawingPoints[0].y);
+            
+            for (let i = 1; i < drawingPoints.length; i++) {
+                makerCtx.lineTo(drawingPoints[i].x, drawingPoints[i].y);
+            }
+            
+            makerCtx.stroke();
+        }
+
+        // Advanced line smoothing pipeline
+        function smoothLine() {
+            if (drawingPoints.length < 3) return;
+            
+            // Step 0: Auto-complete line to graph boundaries if incomplete
+            drawingPoints = autoCompleteLine(drawingPoints);
+            
+            // Step 1: Apply moving average filter multiple times for initial smoothing
+            let smoothed = drawingPoints;
+            for (let pass = 0; pass < 3; pass++) {
+                smoothed = movingAverageSmooth(smoothed, 5);
+            }
+            
+            // Step 2: Simplify with RDP (higher epsilon = more simplification)
+            smoothed = rdpSimplify(smoothed, 8);
+            
+            // Step 3: Apply Chaikin's corner cutting for ultra-smooth curves
+            for (let i = 0; i < 4; i++) {
+                smoothed = chaikinSmooth(smoothed);
+            }
+            
+            // Step 4: Final Catmull-Rom interpolation for perfectly smooth output
+            drawingPoints = catmullRomSpline(smoothed, 12);
+        }
+
+        // Auto-complete line to graph edges by extrapolating the trend
+        function autoCompleteLine(points) {
+            if (points.length < 5) return points;
+            
+            const rect = makerCanvas.parentElement.getBoundingClientRect();
+            const padding = 30;
+            const minX = padding;
+            const maxX = rect.width - padding;
+            const minY = padding;
+            const maxY = rect.height - padding;
+            
+            let result = [...points];
+            
+            // Check and extend START of line (left edge)
+            const firstPoint = result[0];
+            if (firstPoint.x > minX + 20) {
+                // Calculate trend from first few points
+                const trendPoints = result.slice(0, Math.min(10, Math.floor(result.length / 3)));
+                const trend = calculateTrend(trendPoints);
+                
+                // Extrapolate backwards to left edge
+                const extendedStart = extrapolateToEdge(firstPoint, trend, minX, minY, maxY, 'start');
+                result = [...extendedStart, ...result];
+            }
+            
+            // Check and extend END of line (right edge)
+            const lastPoint = result[result.length - 1];
+            if (lastPoint.x < maxX - 20) {
+                // Calculate trend from last few points
+                const trendPoints = result.slice(-Math.min(10, Math.floor(result.length / 3)));
+                const trend = calculateTrend(trendPoints);
+                
+                // Extrapolate forwards to right edge
+                const extendedEnd = extrapolateToEdge(lastPoint, trend, maxX, minY, maxY, 'end');
+                result = [...result, ...extendedEnd];
+            }
+            
+            return result;
+        }
+
+        // Calculate the trend (slope) from a set of points using linear regression
+        function calculateTrend(points) {
+            if (points.length < 2) return { dx: 1, dy: 0 };
+            
+            const n = points.length;
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            
+            for (const p of points) {
+                sumX += p.x;
+                sumY += p.y;
+                sumXY += p.x * p.y;
+                sumX2 += p.x * p.x;
+            }
+            
+            const denominator = n * sumX2 - sumX * sumX;
+            if (Math.abs(denominator) < 0.001) {
+                // Vertical line
+                return { dx: 0, dy: points[n-1].y > points[0].y ? 1 : -1 };
+            }
+            
+            const slope = (n * sumXY - sumX * sumY) / denominator;
+            
+            // Normalize to unit vector
+            const mag = Math.sqrt(1 + slope * slope);
+            return { dx: 1 / mag, dy: slope / mag };
+        }
+
+        // Extrapolate from a point along a trend to reach the target X
+        function extrapolateToEdge(startPoint, trend, targetX, minY, maxY, direction) {
+            const points = [];
+            const step = 5; // pixels per step
+            
+            let currentX = startPoint.x;
+            let currentY = startPoint.y;
+            
+            // Determine direction multiplier
+            const dirMult = direction === 'start' ? -1 : 1;
+            
+            // Calculate how many steps needed
+            const distance = Math.abs(targetX - currentX);
+            const steps = Math.ceil(distance / step);
+            
+            if (steps === 0) return points;
+            
+            // Calculate step increments
+            const xStep = (targetX - currentX) / steps;
+            const yStep = xStep * (trend.dy / (trend.dx || 0.001));
+            
+            for (let i = 1; i <= steps; i++) {
+                const newX = currentX + xStep * i;
+                let newY = currentY + yStep * i;
+                
+                // Clamp Y to graph boundaries
+                newY = Math.max(minY, Math.min(maxY, newY));
+                
+                if (direction === 'start') {
+                    points.unshift({ x: newX, y: newY });
+                } else {
+                    points.push({ x: newX, y: newY });
+                }
+            }
+            
+            return points;
+        }
+
+        // Moving average filter - smooths out jitter
+        function movingAverageSmooth(points, windowSize) {
+            if (points.length < windowSize) return points;
+            
+            const result = [];
+            const half = Math.floor(windowSize / 2);
+            
+            for (let i = 0; i < points.length; i++) {
+                let sumX = 0, sumY = 0, count = 0;
+                
+                for (let j = -half; j <= half; j++) {
+                    const idx = Math.max(0, Math.min(points.length - 1, i + j));
+                    sumX += points[idx].x;
+                    sumY += points[idx].y;
+                    count++;
+                }
+                
+                result.push({ x: sumX / count, y: sumY / count });
+            }
+            
+            // Preserve endpoints
+            result[0] = { ...points[0] };
+            result[result.length - 1] = { ...points[points.length - 1] };
+            
+            return result;
+        }
+
+        // Chaikin's corner cutting algorithm - creates smooth curves
+        function chaikinSmooth(points) {
+            if (points.length < 3) return points;
+            
+            const result = [points[0]]; // Keep first point
+            
+            for (let i = 0; i < points.length - 1; i++) {
+                const p0 = points[i];
+                const p1 = points[i + 1];
+                
+                // Q point (25% along segment)
+                result.push({
+                    x: 0.75 * p0.x + 0.25 * p1.x,
+                    y: 0.75 * p0.y + 0.25 * p1.y
+                });
+                
+                // R point (75% along segment)
+                result.push({
+                    x: 0.25 * p0.x + 0.75 * p1.x,
+                    y: 0.25 * p0.y + 0.75 * p1.y
+                });
+            }
+            
+            result.push(points[points.length - 1]); // Keep last point
+            return result;
+        }
+
+        function rdpSimplify(points, epsilon) {
+            if (points.length < 3) return points;
+            
+            let maxDist = 0;
+            let index = 0;
+            const end = points.length - 1;
+            
+            for (let i = 1; i < end; i++) {
+                const dist = perpendicularDistance(points[i], points[0], points[end]);
+                if (dist > maxDist) {
+                    maxDist = dist;
+                    index = i;
+                }
+            }
+            
+            if (maxDist > epsilon) {
+                const left = rdpSimplify(points.slice(0, index + 1), epsilon);
+                const right = rdpSimplify(points.slice(index), epsilon);
+                return left.slice(0, -1).concat(right);
+            }
+            
+            return [points[0], points[end]];
+        }
+
+        function perpendicularDistance(point, lineStart, lineEnd) {
+            const dx = lineEnd.x - lineStart.x;
+            const dy = lineEnd.y - lineStart.y;
+            
+            const mag = Math.sqrt(dx * dx + dy * dy);
+            if (mag === 0) return Math.sqrt((point.x - lineStart.x) ** 2 + (point.y - lineStart.y) ** 2);
+            
+            const u = ((point.x - lineStart.x) * dx + (point.y - lineStart.y) * dy) / (mag * mag);
+            
+            const closestX = lineStart.x + u * dx;
+            const closestY = lineStart.y + u * dy;
+            
+            return Math.sqrt((point.x - closestX) ** 2 + (point.y - closestY) ** 2);
+        }
+
+        function catmullRomSpline(points, segments) {
+            if (points.length < 2) return points;
+            
+            const result = [];
+            
+            for (let i = 0; i < points.length - 1; i++) {
+                const p0 = points[Math.max(i - 1, 0)];
+                const p1 = points[i];
+                const p2 = points[Math.min(i + 1, points.length - 1)];
+                const p3 = points[Math.min(i + 2, points.length - 1)];
+                
+                for (let t = 0; t < segments; t++) {
+                    const tt = t / segments;
+                    result.push(catmullRomPoint(p0, p1, p2, p3, tt));
+                }
+            }
+            
+            result.push(points[points.length - 1]);
+            return result;
+        }
+
+        function catmullRomPoint(p0, p1, p2, p3, t) {
+            const t2 = t * t;
+            const t3 = t2 * t;
+            
+            return {
+                x: 0.5 * ((2 * p1.x) + (-p0.x + p2.x) * t + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3),
+                y: 0.5 * ((2 * p1.y) + (-p0.y + p2.y) * t + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3)
+            };
+        }
+
+        function clearCanvas() {
+            drawingPoints = [];
+            drawMakerBackground();
+        }
+
+        async function saveGraph() {
+            const name = document.getElementById('graph-name').value.trim() || 'Unnamed';
+            
+            if (drawingPoints.length < 2) {
+                alert('Please draw a line first');
+                return;
+            }
+            
+            // Normalize points to 0-1 range
+            const rect = makerCanvas.parentElement.getBoundingClientRect();
+            const padding = 30;
+            const graphW = rect.width - padding * 2;
+            const graphH = rect.height - padding * 2;
+            
+            const normalizedPoints = drawingPoints.map(p => ({
+                x: Math.max(0, Math.min(1, (p.x - padding) / graphW)),
+                y: Math.max(0, Math.min(1, 1 - (p.y - padding) / graphH))
+            }));
+            
+            if (editingGraphId) {
+                // Update existing graph
+                const graphData = {
+                    id: editingGraphId,
+                    name,
+                    points: normalizedPoints,
+                    timestamp: Date.now()
+                };
+                await updateGraphInDB(graphData);
+                editingGraphId = null;
+            } else {
+                // Create new graph
+                const graphData = {
+                    name,
+                    points: normalizedPoints,
+                    timestamp: Date.now()
+                };
+                await saveGraphToDB(graphData);
+            }
+            
+            clearCanvas();
+            document.getElementById('graph-name').value = '';
+            showScreen('landing');
+        }
+
+        // Export/Import Functions
+        async function exportData() {
+            const allGraphs = await getAllGraphs();
+            
+            if (allGraphs.length === 0) {
+                alert('No graphs to export');
+                return;
+            }
+            
+            const exportObj = {
+                version: '1.0',
+                exported: new Date().toISOString(),
+                graphs: allGraphs.map(g => ({
+                    name: g.name,
+                    points: g.points,
+                    timestamp: g.timestamp
+                }))
+            };
+            
+            const dataStr = JSON.stringify(exportObj, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `locasdb-backup-${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        async function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                
+                if (!data.graphs || !Array.isArray(data.graphs)) {
+                    alert('Invalid backup file');
+                    return;
+                }
+                
+                let imported = 0;
+                for (const graph of data.graphs) {
+                    if (graph.name && graph.points && Array.isArray(graph.points)) {
+                        await saveGraphToDB({
+                            name: graph.name,
+                            points: graph.points,
+                            timestamp: graph.timestamp || Date.now()
+                        });
+                        imported++;
+                    }
+                }
+                
+                alert(`Imported ${imported} graph${imported !== 1 ? 's' : ''}`);
+                renderBestChoices();
+                
+            } catch (e) {
+                alert('Error reading file: ' + e.message);
+            }
+            
+            // Reset file input
+            event.target.value = '';
+        }
+
+        // Initialize
+        initDB().then(() => {
+            renderBestChoices();
+        });
+    </script>
+</body>
+</html>
