@@ -39,18 +39,7 @@
             --safe-bottom: env(safe-area-inset-bottom, 0px);
             --safe-left: env(safe-area-inset-left, 0px);
             --safe-right: env(safe-area-inset-right, 0px);
-            /* Dynamic sizing using viewport and clamp */
-            --nav-height: clamp(60px, 10vh, 80px);
-            --spacing-xs: clamp(4px, 1vw, 8px);
-            --spacing-sm: clamp(8px, 2vw, 12px);
-            --spacing-md: clamp(12px, 3vw, 20px);
-            --spacing-lg: clamp(16px, 4vw, 28px);
-            --font-xs: clamp(10px, 2.5vw, 12px);
-            --font-sm: clamp(12px, 3vw, 14px);
-            --font-md: clamp(14px, 3.5vw, 16px);
-            --font-lg: clamp(18px, 4.5vw, 24px);
-            --font-xl: clamp(24px, 6vw, 32px);
-            --btn-min-size: clamp(44px, 12vw, 56px);
+            --nav-height: 70px;
             --toast-bg: rgba(40, 40, 40, 0.95);
         }
 
@@ -63,12 +52,14 @@
         }
 
         .app {
-            height: 100%;
-            height: 100dvh; /* Dynamic viewport height for mobile */
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             display: flex;
             flex-direction: column;
             padding-top: var(--safe-top);
-            padding-bottom: var(--safe-bottom);
         }
 
         .screen {
@@ -139,7 +130,7 @@
         }
 
         .landing-title {
-            font-size: var(--font-xl);
+            font-size: 28px;
             font-weight: 300;
             letter-spacing: 2px;
         }
@@ -154,7 +145,7 @@
         .content {
             flex: 1;
             overflow-y: auto;
-            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 20px);
         }
 
         /* Graph Grid */
@@ -221,34 +212,30 @@
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding: var(--spacing-sm) 0;
-            padding-bottom: calc(var(--spacing-sm) + var(--safe-bottom));
+            padding: 8px 0;
+            padding-bottom: calc(8px + var(--safe-bottom));
             padding-left: var(--safe-left);
             padding-right: var(--safe-right);
-            background: linear-gradient(to top, var(--bg-primary) 0%, var(--bg-primary) 80%, transparent 100%);
-            background-color: var(--bg-primary);
+            background: var(--bg-primary);
             border-top: 1px solid var(--border-color);
-            flex-shrink: 0;
-            min-height: var(--nav-height);
+            height: calc(var(--nav-height) + var(--safe-bottom));
             z-index: 100;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
         }
 
         .nav-item {
             background: none;
             border: none;
             color: var(--text-secondary);
-            padding: var(--spacing-xs) var(--spacing-sm);
+            padding: 8px 16px;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 4px;
-            transition: color 0.3s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: color 0.3s ease, transform 0.2s ease;
             position: relative;
-            min-width: var(--btn-min-size);
-            min-height: var(--btn-min-size);
+            min-width: 50px;
+            min-height: 50px;
             justify-content: center;
         }
 
@@ -273,8 +260,8 @@
         }
 
         .nav-item svg {
-            width: clamp(22px, 6vw, 28px);
-            height: clamp(22px, 6vw, 28px);
+            width: 26px;
+            height: 26px;
         }
 
         /* Viewer */
@@ -287,16 +274,15 @@
         }
 
         .viewer-toggle button {
-            padding: var(--spacing-sm) var(--spacing-lg);
+            padding: 10px 20px;
             border: none;
             background: none;
             color: var(--text-secondary);
-            font-size: var(--font-sm);
+            font-size: 14px;
             border-radius: 6px;
             cursor: pointer;
-            transition: background 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-                        color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            min-height: var(--btn-min-size);
+            transition: background 0.3s ease, color 0.3s ease;
+            min-height: 44px;
         }
 
         .viewer-toggle button.active {
@@ -317,6 +303,7 @@
             align-items: center;
             justify-content: center;
             padding: 16px;
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
         }
 
         .swipe-card {
@@ -394,6 +381,7 @@
             display: flex;
             flex-direction: column;
             padding: 16px;
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
         }
 
         .detail-graph {
@@ -419,22 +407,21 @@
         .detail-actions {
             display: flex;
             justify-content: center;
-            gap: 16px;
-            padding: 16px;
+            gap: 12px;
+            padding: 12px;
+            flex-shrink: 0;
         }
 
         .detail-btn {
-            padding: var(--spacing-md) var(--spacing-lg);
+            padding: 12px 24px;
             border: 1px solid var(--border-color);
             background: var(--bg-secondary);
             color: var(--text-primary);
             border-radius: 8px;
-            font-size: var(--font-sm);
+            font-size: 14px;
             cursor: pointer;
-            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-                        background 0.3s ease,
-                        border-color 0.3s ease;
-            min-height: var(--btn-min-size);
+            transition: transform 0.2s ease, background 0.2s ease;
+            min-height: 48px;
         }
 
         .detail-btn:active {
@@ -451,7 +438,8 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 10px;
+            padding: 12px;
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 12px);
             overflow: hidden;
             min-height: 0;
         }
@@ -497,16 +485,16 @@
 
         .maker-btn {
             flex: 1;
-            padding: var(--spacing-md);
+            padding: 14px 20px;
             border: 1px solid var(--border-color);
             background: var(--bg-secondary);
             color: var(--text-primary);
-            border-radius: 8px;
-            font-size: var(--font-md);
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
-            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-                        background 0.3s ease;
-            min-height: var(--btn-min-size);
+            transition: transform 0.2s ease, background 0.2s ease;
+            min-height: 50px;
         }
 
         .maker-btn:active {
@@ -548,7 +536,8 @@
             align-items: center;
             justify-content: center;
             color: var(--text-secondary);
-            gap: 16px;
+            gap: 12px;
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom));
         }
 
         .empty-state svg {
@@ -838,13 +827,8 @@
             color: var(--text-primary);
         }
 
-        /* Responsive adjustments */
-        /* Extra small devices (very small phones) */
-        @media (max-width: 320px) {
-            :root {
-                --btn-min-size: 40px;
-            }
-            
+        /* Responsive - small phones */
+        @media (max-width: 380px) {
             .graph-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 8px;
@@ -852,44 +836,19 @@
             }
             
             .landing-header {
-                padding: 16px 12px 12px;
+                padding: 20px 12px 12px;
             }
             
-            .drawing-toolbar {
-                gap: 4px;
-            }
-            
-            .pen-size-selector {
-                padding: 2px 4px;
-            }
-        }
-        
-        /* Small devices (phones) */
-        @media (max-width: 380px) {
-            .graph-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-                padding: 0 16px;
-            }
-            
-            .landing-header {
-                padding: 24px 16px 16px;
-            }
-        }
-        
-        /* Medium devices (large phones, small tablets) */
-        @media (min-width: 480px) {
-            .graph-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 14px;
+            .landing-title {
+                font-size: 24px;
             }
         }
 
-        /* Large devices (tablets) */
+        /* Responsive - tablets and larger */
         @media (min-width: 768px) {
             .graph-grid {
                 grid-template-columns: repeat(4, 1fr);
-                max-width: 800px;
+                max-width: 700px;
                 margin: 0 auto;
             }
             
@@ -898,37 +857,8 @@
             }
             
             .maker-container {
-                max-width: 600px;
+                max-width: 500px;
                 margin: 0 auto;
-            }
-        }
-        
-        /* Extra large devices (desktops) */
-        @media (min-width: 1024px) {
-            .graph-grid {
-                grid-template-columns: repeat(5, 1fr);
-                max-width: 1000px;
-            }
-        }
-        
-        /* Landscape orientation on mobile */
-        @media (max-height: 500px) and (orientation: landscape) {
-            :root {
-                --nav-height: 56px;
-                --btn-min-size: 40px;
-            }
-            
-            .landing-header {
-                padding: 12px 24px;
-            }
-            
-            .header {
-                min-height: 36px;
-                padding: 8px;
-            }
-            
-            .drawing-toolbar {
-                margin-bottom: 6px;
             }
         }
     </style>
