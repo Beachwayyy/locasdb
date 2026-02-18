@@ -640,21 +640,23 @@
             color: var(--text-secondary);
         }
 
+        .modal-rename-section {
+            margin-bottom: 16px;
+        }
+
         .modal-input {
             width: 100%;
-            padding: 14px 16px;
-            background: var(--bg-card);
+            padding: 14px;
+            background: var(--bg-secondary);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             color: var(--text-primary);
             font-size: 16px;
-            margin-bottom: 8px;
-            transition: border-color 0.3s ease;
         }
 
         .modal-input:focus {
-            border-color: #444;
             outline: none;
+            border-color: #555;
         }
 
         .modal-btn {
@@ -1188,12 +1190,12 @@
                 <div class="modal-header">
                     <div class="modal-title" id="modal-graph-name">Graph Options</div>
                 </div>
-                <input type="text" id="rename-input" class="modal-input" placeholder="Enter new name">
-                <button class="modal-btn" onclick="saveRename()">Save Name</button>
+                <div class="modal-rename-section">
+                    <input type="text" id="rename-input" class="modal-input" placeholder="Enter new name">
+                </div>
                 <button class="modal-btn" onclick="toggleStar()" id="star-btn">⭐ Star Graph</button>
                 <button class="modal-btn" onclick="editGraph()">✏️ Edit Graph</button>
-                <button class="modal-btn danger" onclick="confirmDelete()">Delete Graph</button>
-                <button class="modal-btn cancel" onclick="hideModal()">Cancel</button>
+                <button class="modal-btn danger" onclick="confirmDelete()">🗑️ Delete Graph</button>
             </div>
         </div>
     </div>
@@ -1462,14 +1464,26 @@
 
         function closeModal(e) {
             if (e.target.classList.contains('modal-overlay')) {
-                // Auto-save name if changed
-                const input = document.getElementById('rename-input');
-                if (contextMenuGraph && input.value.trim() && input.value.trim() !== contextMenuGraph.name) {
-                    saveRename();
-                } else {
-                    hideModal();
+                autoSaveAndClose();
+            }
+        }
+        
+        async function autoSaveAndClose() {
+            const input = document.getElementById('rename-input');
+            if (contextMenuGraph && input.value.trim() && input.value.trim() !== contextMenuGraph.name) {
+                contextMenuGraph.name = input.value.trim();
+                await updateGraphInDB(contextMenuGraph);
+                showToast('Name saved', 'success', 1500);
+                
+                // Refresh views
+                const activeScreen = document.querySelector('.screen.active').id;
+                if (activeScreen === 'landing-screen') {
+                    renderBestChoices();
+                } else if (activeScreen === 'viewer-screen') {
+                    renderViewer();
                 }
             }
+            hideModal();
         }
 
         async function saveRename() {
@@ -1578,8 +1592,15 @@
             
             if (graphs.length === 0) {
                 document.getElementById('swipe-name').textContent = 'No graphs';
+                const canvas = document.getElementById('swipe-canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 return;
             }
+            
+            // Ensure index is valid
+            if (currentGraphIndex >= graphs.length) currentGraphIndex = graphs.length - 1;
+            if (currentGraphIndex < 0) currentGraphIndex = 0;
             
             graphs.forEach((_, i) => {
                 const dot = document.createElement('div');
@@ -1600,26 +1621,50 @@
             // Swipe gestures
             const swipeCard = document.querySelector('.swipe-card');
             let startX = 0;
+            let isSwiping = false;
             
             swipeCard.ontouchstart = (e) => {
                 startX = e.touches[0].clientX;
+                isSwiping = false;
+                swipeCard.style.transition = 'none';
+            };
+            
+            swipeCard.ontouchmove = (e) => {
+                const currentX = e.touches[0].clientX;
+                const diff = currentX - startX;
+                if (Math.abs(diff) > 10) {
+                    isSwiping = true;
+                }
             };
             
             swipeCard.ontouchend = (e) => {
                 const endX = e.changedTouches[0].clientX;
                 const diff = startX - endX;
                 
+                swipeCard.style.transition = '';
+                
                 if (Math.abs(diff) > 50) {
                     if (diff > 0 && currentGraphIndex < graphs.length - 1) {
-                        currentGraphIndex++;
+                        swipeCard.classList.add('swiping-left');
+                        setTimeout(() => {
+                            currentGraphIndex++;
+                            swipeCard.classList.remove('swiping-left');
+                            renderSwipeView();
+                        }, 300);
                     } else if (diff < 0 && currentGraphIndex > 0) {
-                        currentGraphIndex--;
+                        swipeCard.classList.add('swiping-right');
+                        setTimeout(() => {
+                            currentGraphIndex--;
+                            swipeCard.classList.remove('swiping-right');
+                            renderSwipeView();
+                        }, 300);
                     }
-                    renderSwipeView();
                 }
             };
             
-            swipeCard.onclick = () => openDetail(graph);
+            swipeCard.onclick = (e) => {
+                if (!isSwiping) openDetail(graph);
+            };
         }
 
         function renderGalleryView() {
@@ -1674,7 +1719,8 @@
             
             const w = rect.width;
             const h = rect.height;
-            const padding = 30;
+            // Use smaller padding for small preview cards
+            const padding = Math.min(w, h) < 150 ? 10 : 30;
             
             ctx.clearRect(0, 0, w, h);
             
