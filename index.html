@@ -5,289 +5,2706 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Locas">
-    <meta name="theme-color" content="#000000">
-    <title>Locas</title>
+    <meta name="apple-mobile-web-app-title" content="LocasDB">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="description" content="Track and compare with custom graphs">
+    <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22LocasDB%22%2C%22short_name%22%3A%22LocasDB%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230a0a0a%22%2C%22theme_color%22%3A%22%230a0a0a%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520100%2520100%27%253E%253Crect%2520fill%3D%27%25230a0a0a%27%2520width%3D%27100%27%2520height%3D%27100%27%2520rx%3D%2720%27%2F%253E%253Cpath%2520d%3D%27M20%252070%2520L50%252030%2520L80%252050%27%2520stroke%3D%27%2523fff%27%2520stroke-width%3D%274%27%2520fill%3D%27none%27%2F%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+    <title>LocasDB</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a0a' width='100' height='100' rx='20'/><path d='M20 70 L50 30 L80 50' stroke='%23fff' stroke-width='4' fill='none'/></svg>">
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
-        :root{--bg:#000;--bg-elevated:#1c1c1e;--bg-grouped:#2c2c2e;--bg-glass:rgba(30,30,32,0.8);--separator:rgba(84,84,88,0.65);--label:#fff;--label-secondary:rgba(235,235,245,0.6);--label-tertiary:rgba(235,235,245,0.3);--accent:#0a84ff;--green:#30d158;--orange:#ff9f0a;--red:#ff453a;--pink:#ff375f;--safe-top:env(safe-area-inset-top,20px);--safe-bottom:env(safe-area-inset-bottom,0px);--tab-height:83px;--spring:cubic-bezier(0.23,1,0.32,1)}
-        html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--label);-webkit-font-smoothing:antialiased}
-        .app{position:fixed;inset:0;display:flex;flex-direction:column;padding-top:var(--safe-top)}
-        .screen{position:absolute;inset:0;top:var(--safe-top);display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:scale(0.95);transition:all 0.4s var(--spring)}
-        .screen.active{opacity:1;pointer-events:auto;transform:scale(1)}
-        .large-header{padding:8px 20px}
-        .large-title{font-size:34px;font-weight:700;letter-spacing:0.37px}
-        .subtitle{font-size:15px;color:var(--label-secondary);margin-top:4px}
-        .scroll-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--tab-height) + var(--safe-bottom) + 20px)}
-        .section{margin:24px 0}
-        .section-header{display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:12px}
-        .section-title{font-size:22px;font-weight:700}
-        .section-action{font-size:17px;color:var(--accent);background:none;border:none;cursor:pointer}
-        .card-scroll{display:flex;gap:12px;padding:0 20px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
-        .card-scroll::-webkit-scrollbar{display:none}
-        .graph-card{flex-shrink:0;width:150px;background:var(--bg-elevated);border-radius:16px;overflow:hidden;scroll-snap-align:start;cursor:pointer;transition:transform 0.3s var(--spring)}
-        .graph-card:active{transform:scale(0.95)}
-        .graph-card.featured{width:260px}
-        .graph-card-canvas{aspect-ratio:1.2;background:linear-gradient(180deg,var(--bg-elevated),rgba(0,0,0,0.3))}
-        .graph-card-canvas canvas{width:100%;height:100%}
-        .graph-card-info{padding:12px}
-        .graph-card-name{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .graph-card-meta{font-size:13px;color:var(--label-secondary);margin-top:2px}
-        .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 20px}
-        .stat-card{background:var(--bg-elevated);border-radius:16px;padding:16px}
-        .stat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
-        .stat-icon.blue{background:var(--accent)}.stat-icon.green{background:var(--green)}.stat-icon.orange{background:var(--orange)}.stat-icon.pink{background:var(--pink)}
-        .stat-value{font-size:28px;font-weight:700}
-        .stat-label{font-size:13px;color:var(--label-secondary)}
-        .comparison-section{margin:0 20px 24px;background:var(--bg-elevated);border-radius:16px;overflow:hidden}
-        .comparison-header{padding:16px;border-bottom:1px solid var(--separator)}
-        .comparison-title{font-size:17px;font-weight:600}
-        .comparison-subtitle{font-size:13px;color:var(--label-secondary);margin-top:2px}
-        .comparison-canvas{aspect-ratio:1.3;padding:8px}
-        .comparison-canvas canvas{width:100%;height:100%}
-        .tab-bar{position:fixed;bottom:0;left:0;right:0;height:calc(var(--tab-height) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:var(--bg-glass);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:0.5px solid var(--separator);display:flex;justify-content:space-around;align-items:flex-start;padding-top:8px;z-index:100}
-        .tab-item{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;color:var(--label-tertiary);cursor:pointer;padding:4px 16px;transition:all 0.2s var(--spring);min-width:60px}
-        .tab-item.active{color:var(--accent)}
-        .tab-item:active{transform:scale(0.85)}
-        .tab-item svg{width:28px;height:28px}
-        .tab-item span{font-size:10px;font-weight:500}
-        .segment-control{display:flex;background:var(--bg-grouped);border-radius:9px;padding:2px;margin:16px 20px}
-        .segment-btn{flex:1;padding:8px;border:none;background:none;color:var(--label);font-size:13px;font-weight:500;border-radius:7px;cursor:pointer;transition:all 0.2s}
-        .segment-btn.active{background:var(--bg-elevated);box-shadow:0 1px 4px rgba(0,0,0,0.3)}
-        .gallery-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;padding:2px}
-        .gallery-item{aspect-ratio:1;background:var(--bg-elevated);position:relative;cursor:pointer}
-        .gallery-item canvas{width:100%;height:100%}
-        .gallery-item:active{opacity:0.7}
-        .gallery-item-name{position:absolute;bottom:0;left:0;right:0;padding:8px;background:linear-gradient(transparent,rgba(0,0,0,0.8));font-size:12px;font-weight:500}
-        .swipe-view{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;padding-bottom:calc(var(--tab-height) + var(--safe-bottom) + 20px)}
-        .swipe-card{width:100%;max-width:320px;aspect-ratio:0.75;background:var(--bg-elevated);border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);transition:all 0.4s var(--spring)}
-        .swipe-card.swiping-left{transform:translateX(-150%) rotate(-15deg);opacity:0}
-        .swipe-card.swiping-right{transform:translateX(150%) rotate(15deg);opacity:0}
-        .swipe-card-canvas{height:70%}
-        .swipe-card-canvas canvas{width:100%;height:100%}
-        .swipe-card-info{height:30%;padding:20px;background:linear-gradient(180deg,var(--bg-elevated),#0a0a0a)}
-        .swipe-card-name{font-size:24px;font-weight:700;margin-bottom:8px}
-        .swipe-card-rating{display:flex;align-items:center;gap:8px}
-        .rating-bar{flex:1;height:6px;background:var(--bg-grouped);border-radius:3px;overflow:hidden}
-        .rating-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--accent));border-radius:3px;transition:width 0.5s var(--spring)}
-        .rating-label{font-size:15px;font-weight:600;color:var(--accent)}
-        .swipe-indicators{display:flex;justify-content:center;gap:6px;margin-top:20px}
-        .swipe-dot{width:8px;height:8px;border-radius:50%;background:var(--label-tertiary);transition:all 0.3s var(--spring)}
-        .swipe-dot.active{width:24px;border-radius:4px;background:var(--label)}
-        .create-container{flex:1;display:flex;flex-direction:column;padding:16px;padding-bottom:calc(var(--tab-height) + var(--safe-bottom) + 16px);gap:12px}
-        .canvas-wrapper{flex:1;background:var(--bg-elevated);border-radius:20px;position:relative;overflow:hidden;touch-action:none;box-shadow:inset 0 0 0 1px var(--separator)}
-        .canvas-wrapper canvas{width:100%;height:100%}
-        .canvas-hint{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--label-tertiary);pointer-events:none;transition:opacity 0.3s}
-        .canvas-hint.hidden{opacity:0}
-        .canvas-hint svg{width:48px;height:48px;margin-bottom:12px;opacity:0.5}
-        .create-input{background:var(--bg-elevated);border:none;border-radius:14px;padding:16px 20px;color:var(--label);font-size:17px;outline:none;box-shadow:inset 0 0 0 1px var(--separator);transition:box-shadow 0.2s}
-        .create-input:focus{box-shadow:inset 0 0 0 2px var(--accent)}
-        .create-input::placeholder{color:var(--label-tertiary)}
-        .create-actions{display:flex;gap:12px}
-        .create-btn{flex:1;padding:16px;border:none;border-radius:14px;font-size:17px;font-weight:600;cursor:pointer;transition:transform 0.2s var(--spring)}
-        .create-btn:active{transform:scale(0.96)}
-        .create-btn.secondary{background:var(--bg-elevated);color:var(--label)}
-        .create-btn.primary{background:var(--accent);color:#fff}
-        .create-btn:disabled{opacity:0.4;pointer-events:none}
-        .detail-header{display:flex;align-items:center;padding:8px}
-        .back-btn{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--accent);font-size:17px;cursor:pointer;padding:8px}
-        .back-btn svg{width:24px;height:24px}
-        .detail-canvas-container{margin:0 16px;aspect-ratio:1;background:var(--bg-elevated);border-radius:20px;overflow:hidden}
-        .detail-canvas-container canvas{width:100%;height:100%}
-        .detail-info{padding:20px}
-        .detail-stats{display:flex;gap:12px;margin-bottom:20px}
-        .detail-stat{flex:1;background:var(--bg-elevated);border-radius:12px;padding:12px;text-align:center}
-        .detail-stat-value{font-size:24px;font-weight:700;color:var(--accent)}
-        .detail-stat-label{font-size:12px;color:var(--label-secondary);margin-top:4px}
-        .detail-actions{display:flex;gap:12px}
-        .detail-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;background:var(--bg-elevated);color:var(--label);transition:transform 0.2s var(--spring)}
-        .detail-btn:active{transform:scale(0.95)}
-        .detail-btn.danger{color:var(--red)}
-        .detail-btn svg{width:20px;height:20px}
-        .settings-list{margin:0 20px}
-        .settings-group{background:var(--bg-elevated);border-radius:12px;overflow:hidden;margin-bottom:35px}
-        .settings-group-title{font-size:13px;color:var(--label-secondary);text-transform:uppercase;padding:8px 20px;margin-bottom:8px}
-        .settings-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:none;border:none;width:100%;text-align:left;cursor:pointer;color:var(--label);font-size:17px}
-        .settings-item:not(:last-child){border-bottom:0.5px solid var(--separator)}
-        .settings-item:active{background:var(--bg-grouped)}
-        .settings-item-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center}
-        .settings-item-icon.blue{background:var(--accent)}.settings-item-icon.green{background:var(--green)}.settings-item-icon.red{background:var(--red)}.settings-item-icon.purple{background:#bf5af2}
-        .settings-item-icon svg{width:18px;height:18px;color:#fff}
-        .settings-item-content{flex:1}
-        .settings-item-value{font-size:13px;color:var(--label-secondary)}
-        .action-sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;opacity:0;visibility:hidden;transition:all 0.3s}
-        .action-sheet-overlay.active{opacity:1;visibility:visible}
-        .action-sheet{position:fixed;bottom:0;left:8px;right:8px;padding-bottom:calc(var(--safe-bottom) + 8px);transform:translateY(100%);transition:transform 0.4s var(--spring);z-index:1001}
-        .action-sheet-overlay.active .action-sheet{transform:translateY(0)}
-        .action-sheet-group{background:var(--bg-glass);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-radius:14px;overflow:hidden;margin-bottom:8px}
-        .action-sheet-header{padding:16px;text-align:center;border-bottom:0.5px solid var(--separator)}
-        .action-sheet-title{font-size:13px;color:var(--label-secondary);font-weight:600}
-        .action-sheet-btn{width:100%;padding:18px;background:none;border:none;color:var(--accent);font-size:20px;cursor:pointer}
-        .action-sheet-btn:not(:last-child){border-bottom:0.5px solid var(--separator)}
-        .action-sheet-btn:active{background:rgba(255,255,255,0.1)}
-        .action-sheet-btn.danger{color:var(--red)}
-        .action-sheet-btn.cancel{font-weight:600}
-        .toast-container{position:fixed;top:calc(var(--safe-top) + 8px);left:50%;transform:translateX(-50%);z-index:2000}
-        .toast{background:var(--bg-glass);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-radius:100px;padding:12px 20px;font-size:15px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,0.3);transform:translateY(-100px);opacity:0;transition:all 0.4s var(--spring)}
-        .toast.show{transform:translateY(0);opacity:1}
-        .toast.success{color:var(--green)}.toast.error{color:var(--red)}
-        .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 40px;text-align:center}
-        .empty-state svg{width:64px;height:64px;color:var(--label-tertiary);margin-bottom:16px}
-        .empty-state h3{font-size:20px;font-weight:600;margin-bottom:8px}
-        .empty-state p{font-size:15px;color:var(--label-secondary)}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #151515;
+            --border-color: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --accent: #3a3a3a;
+            --graph-line: #ffffff;
+            --graph-special: #ff6b6b;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+            --nav-height: 70px;
+            --toast-bg: rgba(40, 40, 40, 0.95);
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .app {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            padding-top: var(--safe-top);
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .screen.active {
+            display: flex;
+            animation: screenIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes screenIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(10px) scale(0.98);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255,255,255,0.1); }
+            50% { box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            position: relative;
+            min-height: 44px;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .header-back {
+            position: absolute;
+            left: 16px;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .header-icon {
+            position: absolute;
+            right: 16px;
+            opacity: 0.6;
+        }
+
+        /* Landing Page */
+        .landing-header {
+            padding: 24px 20px 12px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .landing-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        .landing-logo svg {
+            opacity: 0.9;
+        }
+
+        .landing-title {
+            font-size: 22px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #fff 0%, #888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 12px 24px 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .comparison-chart-container {
+            margin: 0 24px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            aspect-ratio: 1.2;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .comparison-chart-container canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 20px);
+        }
+
+        /* Graph Grid */
+        .graph-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 0 24px;
+        }
+
+        .graph-card {
+            background: linear-gradient(145deg, var(--bg-card) 0%, #101010 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                        border-color 0.3s ease,
+                        box-shadow 0.3s ease;
+            animation: fadeInUp 0.4s ease forwards;
+            animation-delay: calc(var(--card-index, 0) * 0.05s);
+            opacity: 0;
+        }
+
+        .graph-card:hover {
+            border-color: #404040;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .graph-card:active {
+            transform: scale(0.95) translateY(0);
+            transition: transform 0.1s ease;
+        }
+
+        .graph-card-preview {
+            aspect-ratio: 1;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .graph-card-preview canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .graph-card-name {
+            font-size: 10px;
+            text-align: center;
+            padding: 6px 4px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-card);
+            border-radius: 0 0 12px 12px;
+            min-height: 22px;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0;
+            padding-bottom: calc(8px + var(--safe-bottom));
+            padding-left: var(--safe-left);
+            padding-right: var(--safe-right);
+            background: linear-gradient(180deg, rgba(10,10,10,0.95) 0%, rgba(5,5,5,0.98) 100%);
+            border-top: 1px solid var(--border-color);
+            height: calc(var(--nav-height) + var(--safe-bottom));
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            min-width: 56px;
+            min-height: 50px;
+            justify-content: center;
+            border-radius: 12px;
+        }
+
+        .nav-item.active {
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(255,255,255,0.5);
+        }
+
+        .nav-item:active {
+            transform: scale(0.9);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .nav-item svg {
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-item.active svg {
+            transform: scale(1.1);
+        }
+
+        /* Viewer */
+        .viewer-toggle {
+            display: flex;
+            margin: 0 auto 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .viewer-toggle button {
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease, color 0.3s ease;
+            min-height: 44px;
+        }
+
+        .viewer-toggle button.active {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .viewer-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 0 16px;
+        }
+
+        .swipe-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+        }
+
+        .swipe-card {
+            width: 100%;
+            max-width: 300px;
+            aspect-ratio: 0.85;
+            background: linear-gradient(180deg, var(--bg-card) 0%, #0a0a0a 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                        opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                        box-shadow 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .swipe-card.swiping-left {
+            transform: translateX(-150%) rotate(-12deg);
+            opacity: 0;
+        }
+
+        .swipe-card.swiping-right {
+            transform: translateX(150%) rotate(12deg);
+            opacity: 0;
+        }
+
+        .swipe-card:active {
+            transform: scale(0.97);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+
+        .swipe-card-preview {
+            flex: 1;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .swipe-card-preview canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .swipe-card-name {
+            font-size: 15px;
+            font-weight: 500;
+            text-align: center;
+            padding: 14px 16px;
+            border-top: 1px solid var(--border-color);
+            background: rgba(0,0,0,0.2);
+        }
+
+        .swipe-nav {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px;
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 8px);
+        }
+
+        .swipe-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-color);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+        }
+
+        .swipe-dot.active {
+            background: var(--text-primary);
+            transform: scale(1.2);
+            box-shadow: 0 0 8px rgba(255,255,255,0.3);
+        }
+
+        /* Detail View */
+        .detail-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+        }
+
+        .detail-graph {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .detail-graph canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .detail-name {
+            text-align: center;
+            padding: 16px;
+            font-size: 18px;
+        }
+
+        .detail-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 12px;
+            flex-shrink: 0;
+        }
+
+        .detail-btn {
+            padding: 12px 24px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease;
+            min-height: 48px;
+        }
+
+        .detail-btn:active {
+            transform: scale(0.96);
+        }
+
+        .detail-btn.danger {
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+
+        /* Maker */
+        .maker-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+            overflow: hidden;
+            min-height: 0;
+            gap: 10px;
+        }
+
+        .maker-canvas-container {
+            flex: 1;
+            background: linear-gradient(180deg, var(--bg-card) 0%, #0d0d0d 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+            min-height: 0;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .maker-canvas-container canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .maker-input {
+            padding: 14px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 16px;
+            width: 100%;
+            flex-shrink: 0;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .maker-input:focus {
+            outline: none;
+            border-color: #444;
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
+        }
+
+        .maker-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .maker-actions {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .maker-btn {
+            flex: 1;
+            padding: 16px 20px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            min-height: 52px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .maker-btn:active {
+            transform: scale(0.95);
+        }
+
+        .maker-btn.primary {
+            background: linear-gradient(135deg, #fff 0%, #e0e0e0 100%);
+            color: var(--bg-primary);
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(255,255,255,0.15);
+        }
+        
+        .maker-btn.primary:active {
+            box-shadow: 0 2px 6px rgba(255,255,255,0.1);
+        }
+
+        /* Axis labels */
+        .axis-label {
+            position: absolute;
+            font-size: 9px;
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .axis-y {
+            left: 6px;
+            top: 50%;
+            transform: rotate(-90deg) translateX(-50%);
+            transform-origin: left center;
+        }
+
+        .axis-x {
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Empty state */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            gap: 12px;
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom));
+        }
+
+        .empty-state svg {
+            opacity: 0.3;
+        }
+
+        /* Zone overlay toggle */
+        .zone-toggle {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 6px 12px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            cursor: pointer;
+            z-index: 10;
+            transition: color 0.3s ease,
+                        border-color 0.3s ease,
+                        background 0.3s ease,
+                        transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .zone-toggle:active {
+            transform: scale(0.94);
+        }
+
+        .zone-toggle.active {
+            color: var(--text-primary);
+            border-color: var(--text-primary);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .header-back {
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .header-back:active {
+            transform: scale(0.9);
+        }
+
+        .content {
+            scroll-behavior: smooth;
+        }
+
+        .maker-input {
+            transition: border-color 0.3s ease;
+        }
+
+        .maker-input:focus {
+            border-color: #444;
+            outline: none;
+        }
+
+        /* Context Menu Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            padding-bottom: var(--safe-bottom);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: linear-gradient(180deg, #1a1a1a 0%, #111 100%);
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-width: 400px;
+            padding: 8px 12px 16px;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            text-align: center;
+            padding: 16px 12px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 12px;
+        }
+
+        .modal-title {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-rename-section {
+            margin-bottom: 12px;
+            padding: 0 4px;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: #444;
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 14px 16px;
+            border: none;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .modal-btn:active {
+            transform: scale(0.97);
+            background: #1a1a1a;
+        }
+
+        .modal-btn.danger {
+            color: #ff4444;
+        }
+
+        .modal-btn.cancel {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: calc(var(--safe-top) + 16px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: var(--toast-bg);
+            color: var(--text-primary);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            transform: translateY(-20px);
+            opacity: 0;
+            animation: toastIn 0.3s ease forwards;
+            pointer-events: auto;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+        }
+
+        .toast.success { border-left: 3px solid #4ade80; }
+        .toast.error { border-left: 3px solid #f87171; }
+        .toast.info { border-left: 3px solid #60a5fa; }
+
+        .toast.hiding {
+            animation: toastOut 0.3s ease forwards;
+        }
+
+        @keyframes toastIn {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes toastOut {
+            to { transform: translateY(-20px); opacity: 0; }
+        }
+
+        /* Enhanced Settings Page */
+        .settings-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .settings-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 16px 16px 8px;
+        }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-item:active {
+            background: var(--bg-secondary);
+        }
+
+        .settings-item-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .settings-item-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .settings-item-icon svg {
+            width: 18px;
+            height: 18px;
+            color: var(--text-secondary);
+        }
+
+        .settings-item-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .settings-item-label {
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+
+        .settings-item-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .settings-item-right {
+            color: var(--text-secondary);
+        }
+
+        .settings-item-right svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .settings-footer {
+            text-align: center;
+            padding: 24px;
+            color: var(--text-secondary);
+        }
+
+        .settings-footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .settings-footer a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Responsive - small phones */
+        @media (max-width: 380px) {
+            .graph-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+                padding: 0 12px;
+            }
+            
+            .landing-header {
+                padding: 20px 12px 12px;
+            }
+            
+            .landing-title {
+                font-size: 24px;
+            }
+        }
+
+        /* Responsive - tablets and larger */
+        @media (min-width: 768px) {
+            .graph-grid {
+                grid-template-columns: repeat(4, 1fr);
+                max-width: 700px;
+                margin: 0 auto;
+            }
+            
+            .swipe-card {
+                max-width: 400px;
+            }
+            
+            .maker-container {
+                max-width: 500px;
+                margin: 0 auto;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="app">
-        <!-- PART 1: HOME SCREEN -->
-        <div id="home-screen" class="screen active">
-            <div class="large-header"><h1 class="large-title">Locas</h1><p class="subtitle">Track your hot-crazy matrix</p></div>
-            <div class="scroll-content">
-                <div class="section">
-                    <div class="stats-grid">
-                        <div class="stat-card"><div class="stat-icon blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 3v18h18"/><path d="m6 17 5-7 4 4 5-8"/></svg></div><div class="stat-value" id="total-count">0</div><div class="stat-label">Total Graphs</div></div>
-                        <div class="stat-card"><div class="stat-icon green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="stat-value" id="starred-count">0</div><div class="stat-label">Starred</div></div>
-                        <div class="stat-card"><div class="stat-icon orange"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 20V10"/><path d="M6 20V4"/><path d="M18 20v-6"/></svg></div><div class="stat-value" id="avg-score">--</div><div class="stat-label">Avg Score</div></div>
-                        <div class="stat-card"><div class="stat-icon pink"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></div><div class="stat-value" id="best-match">--</div><div class="stat-label">Best Match</div></div>
-                    </div>
+        <!-- Toast Container -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <!-- Landing Screen -->
+        <div id="landing-screen" class="screen active">
+            <div class="landing-header">
+                <div class="landing-logo">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 3v18h18"/>
+                        <path d="M6 17l5-7 4 4 5-8"/>
+                    </svg>
                 </div>
-                <div class="section"><div class="section-header"><h2 class="section-title">Recent</h2><button class="section-action" onclick="showScreen('viewer')">See All</button></div><div class="card-scroll" id="recent-cards"></div></div>
-                <div class="section" id="starred-section" style="display:none"><div class="section-header"><h2 class="section-title">⭐ Starred</h2></div><div class="card-scroll" id="starred-cards"></div></div>
-                <div class="comparison-section"><div class="comparison-header"><div class="comparison-title">Matrix Overview</div><div class="comparison-subtitle">All graphs plotted on the hot-crazy scale</div></div><div class="comparison-canvas"><canvas id="comparison-canvas"></canvas></div></div>
+                <h1 class="landing-title">LocasDB</h1>
             </div>
+            <div class="section-title">Comparison Chart</div>
+            <div class="comparison-chart-container">
+                <canvas id="comparison-canvas"></canvas>
+            </div>
+            <div class="section-title">Best Choices</div>
+            <div class="content">
+                <div id="best-choices" class="graph-grid"></div>
+            </div>
+            <nav class="bottom-nav">
+                <button class="nav-item active" data-screen="landing">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="viewer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 3v18h18"/>
+                        <path d="M6 17l5-7 4 4 5-8"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="maker">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                </button>
+            </nav>
         </div>
-        <!-- PART 2: VIEWER SCREEN -->
+
+        <!-- Viewer Screen -->
         <div id="viewer-screen" class="screen">
-            <div class="segment-control"><button class="segment-btn active" onclick="setViewMode('swipe')">Swipe</button><button class="segment-btn" onclick="setViewMode('gallery')">Gallery</button></div>
-            <div id="swipe-view" class="swipe-view"><div class="swipe-card" id="swipe-card"><div class="swipe-card-canvas"><canvas id="swipe-canvas"></canvas></div><div class="swipe-card-info"><div class="swipe-card-name" id="swipe-name">No Graphs</div><div class="swipe-card-rating"><div class="rating-bar"><div class="rating-fill" id="swipe-rating" style="width:0%"></div></div><span class="rating-label" id="swipe-score">--</span></div></div></div><div class="swipe-indicators" id="swipe-dots"></div></div>
-            <div id="gallery-view" class="scroll-content" style="display:none"><div class="gallery-grid" id="gallery-grid"></div></div>
-        </div>
-        <!-- PART 3: CREATE SCREEN -->
-        <div id="create-screen" class="screen">
-            <div class="large-header"><h1 class="large-title">Create</h1><p class="subtitle">Draw your graph from 0 to 10</p></div>
-            <div class="create-container">
-                <div class="canvas-wrapper" id="create-canvas-wrapper"><canvas id="create-canvas"></canvas><div class="canvas-hint" id="canvas-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg><p>Draw a line from left to right</p></div></div>
-                <input type="text" class="create-input" id="graph-name-input" placeholder="Enter name...">
-                <div class="create-actions"><button class="create-btn secondary" onclick="clearCanvas()">Clear</button><button class="create-btn primary" id="save-btn" onclick="saveGraph()" disabled>Save</button></div>
+            <div class="header">
+                <h2 class="header-title">Viewer</h2>
             </div>
-        </div>
-        <!-- PART 4: SETTINGS SCREEN -->
-        <div id="settings-screen" class="screen">
-            <div class="large-header"><h1 class="large-title">Settings</h1></div>
-            <div class="scroll-content"><div class="settings-list">
-                <div class="settings-group-title">Data</div>
-                <div class="settings-group">
-                    <button class="settings-item" onclick="exportData()"><div class="settings-item-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg></div><div class="settings-item-content"><div class="settings-item-label">Export Data</div><div class="settings-item-value">Backup all your graphs</div></div></button>
-                    <button class="settings-item" onclick="document.getElementById('import-input').click()"><div class="settings-item-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></div><div class="settings-item-content"><div class="settings-item-label">Import Data</div><div class="settings-item-value">Restore from backup</div></div></button>
-                    <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
-                </div>
-                <div class="settings-group-title">Danger Zone</div>
-                <div class="settings-group"><button class="settings-item" onclick="confirmDeleteAll()"><div class="settings-item-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></div><div class="settings-item-content"><div class="settings-item-label" style="color:var(--red)">Delete All Data</div><div class="settings-item-value">This cannot be undone</div></div></button></div>
-                <div class="settings-group-title">About</div>
-                <div class="settings-group"><div class="settings-item"><div class="settings-item-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div><div class="settings-item-content"><div class="settings-item-label">Version</div></div><span style="color:var(--label-secondary)">2.0.0</span></div></div>
-            </div></div>
-        </div>
-        <!-- PART 5: DETAIL SCREEN -->
-        <div id="detail-screen" class="screen">
-            <div class="detail-header"><button class="back-btn" onclick="closeDetail()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>Back</button></div>
-            <div class="scroll-content">
-                <div class="detail-canvas-container"><canvas id="detail-canvas"></canvas></div>
-                <div class="detail-info">
-                    <h2 id="detail-name" style="font-size:28px;font-weight:700;margin-bottom:20px">Graph Name</h2>
-                    <div class="detail-stats"><div class="detail-stat"><div class="detail-stat-value" id="detail-hot">--</div><div class="detail-stat-label">Avg Hot</div></div><div class="detail-stat"><div class="detail-stat-value" id="detail-crazy">--</div><div class="detail-stat-label">Avg Crazy</div></div><div class="detail-stat"><div class="detail-stat-value" id="detail-score">--</div><div class="detail-stat-label">Score</div></div></div>
-                    <div class="detail-actions">
-                        <button class="detail-btn" onclick="toggleStar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span id="star-btn-text">Star</span></button>
-                        <button class="detail-btn" onclick="editGraph()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>Edit</button>
-                        <button class="detail-btn danger" onclick="confirmDelete()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/></svg>Delete</button>
+            <div class="viewer-toggle">
+                <button id="swipe-mode" class="active">Swipe</button>
+                <button id="gallery-mode">Gallery</button>
+            </div>
+            <div class="content">
+                <div id="swipe-view" class="swipe-container">
+                    <div class="swipe-card">
+                        <div class="swipe-card-preview">
+                            <canvas id="swipe-canvas"></canvas>
+                        </div>
+                        <div id="swipe-name" class="swipe-card-name">-</div>
                     </div>
                 </div>
+                <div id="gallery-view" class="viewer-gallery" style="display: none;"></div>
+            </div>
+            <div id="swipe-dots" class="swipe-nav"></div>
+            <nav class="bottom-nav">
+                <button class="nav-item" data-screen="landing">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                    </svg>
+                </button>
+                <button class="nav-item active" data-screen="viewer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 3v18h18"/>
+                        <path d="M6 17l5-7 4 4 5-8"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="maker">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Detail Screen -->
+        <div id="detail-screen" class="screen">
+            <div class="header">
+                <button class="header-back" onclick="goBack()">&larr;</button>
+                <h2 class="header-title">Select a graph</h2>
+            </div>
+            <div class="detail-container">
+                <div class="detail-graph">
+                    <button id="zone-toggle" class="zone-toggle" onclick="toggleZones()">Zones</button>
+                    <canvas id="detail-canvas"></canvas>
+                    <span class="axis-label axis-y">Psicopatía</span>
+                    <span class="axis-label axis-x">Looks</span>
+                </div>
+                <div id="detail-name" class="detail-name">-</div>
+            </div>
+            <nav class="bottom-nav">
+                <button class="nav-item" data-screen="landing">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                    </svg>
+                </button>
+                <button class="nav-item active" data-screen="viewer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 3v18h18"/>
+                        <path d="M6 17l5-7 4 4 5-8"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="maker">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Maker Screen -->
+        <div id="maker-screen" class="screen">
+            <div class="header">
+                <button class="header-back" onclick="showScreen('landing')">&larr;</button>
+                <h2 class="header-title">Maker</h2>
+            </div>
+            <div class="maker-container">
+                <div class="maker-canvas-container">
+                    <canvas id="maker-canvas"></canvas>
+                    <span class="axis-label axis-y">Psicopatía</span>
+                    <span class="axis-label axis-x">Looks</span>
+                </div>
+                <input type="text" id="graph-name" class="maker-input" placeholder="Name the graph">
+                <div class="maker-actions">
+                    <button class="maker-btn" onclick="clearCanvas()">Clear</button>
+                    <button class="maker-btn primary" onclick="saveGraph()">Save</button>
+                </div>
+            </div>
+            <nav class="bottom-nav">
+                <button class="nav-item" data-screen="landing">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="viewer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 3v18h18"/>
+                        <path d="M6 17l5-7 4 4 5-8"/>
+                    </svg>
+                </button>
+                <button class="nav-item active" data-screen="maker">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="settings-screen" class="screen">
+            <div class="header">
+                <h2 class="header-title">Settings</h2>
+            </div>
+            <div class="content" style="padding: 16px;">
+                <div class="settings-section">
+                    <div class="settings-section-title">Data Management</div>
+                    <div class="settings-item" onclick="exportData()">
+                        <div class="settings-item-left">
+                            <div class="settings-item-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                            </div>
+                            <div class="settings-item-text">
+                                <span class="settings-item-label">Export Data</span>
+                                <span class="settings-item-desc">Download all graphs as JSON</span>
+                            </div>
+                        </div>
+                        <div class="settings-item-right">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="settings-item" onclick="document.getElementById('import-file').click()">
+                        <div class="settings-item-left">
+                            <div class="settings-item-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                    <polyline points="17 8 12 3 7 8"/>
+                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                            </div>
+                            <div class="settings-item-text">
+                                <span class="settings-item-label">Import Data</span>
+                                <span class="settings-item-desc">Restore from backup file</span>
+                            </div>
+                        </div>
+                        <div class="settings-item-right">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)">
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-section-title">Statistics</div>
+                    <div class="settings-item" style="cursor: default;">
+                        <div class="settings-item-left">
+                            <div class="settings-item-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M3 3v18h18"/>
+                                    <path d="M6 17l5-7 4 4 5-8"/>
+                                </svg>
+                            </div>
+                            <div class="settings-item-text">
+                                <span class="settings-item-label">Total Graphs</span>
+                                <span class="settings-item-desc">Graphs saved in database</span>
+                            </div>
+                        </div>
+                        <div class="settings-item-right">
+                            <span id="graph-count-stat" style="font-size: 18px; font-weight: 600; color: var(--text-primary);">0</span>
+                        </div>
+                    </div>
+                    <div class="settings-item" onclick="clearAllData()">
+                        <div class="settings-item-left">
+                            <div class="settings-item-icon" style="background: rgba(239, 68, 68, 0.1);">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                                </svg>
+                            </div>
+                            <div class="settings-item-text">
+                                <span class="settings-item-label" style="color: #ef4444;">Clear All Data</span>
+                                <span class="settings-item-desc">Delete all graphs permanently</span>
+                            </div>
+                        </div>
+                        <div class="settings-item-right">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-section-title">Tips</div>
+                    <div class="settings-item" style="cursor: default;">
+                        <div class="settings-item-left">
+                            <div class="settings-item-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 16v-4"/>
+                                    <path d="M12 8h.01"/>
+                                </svg>
+                            </div>
+                            <div class="settings-item-text">
+                                <span class="settings-item-label">Quick Actions</span>
+                                <span class="settings-item-desc">Long press any graph card to rename, star, edit, or delete</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-footer">
+                    <p style="font-size: 13px; margin-bottom: 8px;">LocasDB v2.0</p>
+                    <a href="https://instagram.com/aurelioharmsen" target="_blank">Made with ♥ by @aurelioharmsen</a>
+                </div>
+            </div>
+            <nav class="bottom-nav">
+                <button class="nav-item" data-screen="landing">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="viewer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 3v18h18"/>
+                        <path d="M6 17l5-7 4 4 5-8"/>
+                    </svg>
+                </button>
+                <button class="nav-item" data-screen="maker">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                </button>
+                <button class="nav-item active" data-screen="settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Context Menu Modal -->
+        <div id="context-modal" class="modal-overlay" onclick="closeModal(event)">
+            <div class="modal-content" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <div class="modal-title" id="modal-graph-name">Graph Options</div>
+                </div>
+                <div class="modal-rename-section">
+                    <input type="text" id="rename-input" class="modal-input" placeholder="Enter new name">
+                </div>
+                <button class="modal-btn" onclick="toggleStar()" id="star-btn">⭐ Star Graph</button>
+                <button class="modal-btn" onclick="editGraph()">✏️ Edit Graph</button>
+                <button class="modal-btn danger" onclick="confirmDelete()">🗑️ Delete Graph</button>
             </div>
         </div>
-        <!-- TAB BAR -->
-        <nav class="tab-bar">
-            <button class="tab-item active" onclick="showScreen('home')" data-screen="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></button>
-            <button class="tab-item" onclick="showScreen('viewer')" data-screen="viewer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg><span>Browse</span></button>
-            <button class="tab-item" onclick="showScreen('create')" data-screen="create"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg><span>Create</span></button>
-            <button class="tab-item" onclick="showScreen('settings')" data-screen="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span>Settings</span></button>
-        </nav>
-        <!-- ACTION SHEET -->
-        <div class="action-sheet-overlay" id="action-sheet" onclick="closeActionSheet(event)"><div class="action-sheet"><div class="action-sheet-group"><div class="action-sheet-header"><div class="action-sheet-title" id="action-sheet-title">Actions</div></div><div id="action-sheet-buttons"></div></div><div class="action-sheet-group"><button class="action-sheet-btn cancel" onclick="hideActionSheet()">Cancel</button></div></div></div>
-        <!-- TOAST -->
-        <div class="toast-container"><div class="toast" id="toast"><span id="toast-message">Message</span></div></div>
     </div>
-<script>
-let graphs=[],currentGraph=null,currentSwipeIndex=0,viewMode='swipe',previousScreen='home',drawingPoints=[],isDrawing=false,db;
-const DB_NAME='LocasDB',STORE_NAME='graphs';
 
-async function initDB(){return new Promise((resolve,reject)=>{const request=indexedDB.open(DB_NAME,1);request.onerror=()=>reject(request.error);request.onsuccess=()=>{db=request.result;resolve(db)};request.onupgradeneeded=(e)=>{const database=e.target.result;if(!database.objectStoreNames.contains(STORE_NAME)){database.createObjectStore(STORE_NAME,{keyPath:'id',autoIncrement:true})}}})}
-async function loadGraphs(){return new Promise((resolve,reject)=>{const transaction=db.transaction([STORE_NAME],'readonly');const store=transaction.objectStore(STORE_NAME);const request=store.getAll();request.onsuccess=()=>{graphs=request.result.sort((a,b)=>{if(a.starred&&!b.starred)return -1;if(!a.starred&&b.starred)return 1;return b.timestamp-a.timestamp});resolve(graphs)};request.onerror=()=>reject(request.error)})}
-async function saveGraphToDB(graph){return new Promise((resolve,reject)=>{const transaction=db.transaction([STORE_NAME],'readwrite');const store=transaction.objectStore(STORE_NAME);const request=store.add(graph);request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
-async function updateGraphInDB(graph){return new Promise((resolve,reject)=>{const transaction=db.transaction([STORE_NAME],'readwrite');const store=transaction.objectStore(STORE_NAME);const request=store.put(graph);request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error)})}
-async function deleteGraphFromDB(id){return new Promise((resolve,reject)=>{const transaction=db.transaction([STORE_NAME],'readwrite');const store=transaction.objectStore(STORE_NAME);const request=store.delete(id);request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error)})}
-async function deleteAllGraphs(){return new Promise((resolve,reject)=>{const transaction=db.transaction([STORE_NAME],'readwrite');const store=transaction.objectStore(STORE_NAME);const request=store.clear();request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error)})}
+    <script>
+        // IndexedDB Setup
+        let db;
+        const DB_NAME = 'LocasDB';
+        const STORE_NAME = 'graphs';
 
-function showScreen(screenId){const currentScreen=document.querySelector('.screen.active');const targetScreen=document.getElementById(screenId+'-screen');if(currentScreen===targetScreen)return;document.querySelectorAll('.tab-item').forEach(tab=>{tab.classList.toggle('active',tab.dataset.screen===screenId)});if(currentScreen)currentScreen.classList.remove('active');targetScreen.classList.add('active');if(navigator.vibrate)navigator.vibrate(10);if(screenId==='home')renderHome();else if(screenId==='viewer')renderViewer();else if(screenId==='create')initCreateCanvas()}
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (e) => {
+                    const database = e.target.result;
+                    if (!database.objectStoreNames.contains(STORE_NAME)) {
+                        const store = database.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                        store.createIndex('name', 'name', { unique: false });
+                        store.createIndex('timestamp', 'timestamp', { unique: false });
+                    }
+                };
+            });
+        }
 
-function calculateScore(graph){if(!graph.points||graph.points.length<2)return 0;let avgX=0,avgY=0;graph.points.forEach(p=>{avgX+=p.x;avgY+=p.y});avgX/=graph.points.length;avgY/=graph.points.length;const yPenalty=Math.abs(avgY-0.45);return Math.max(0,(avgX*10-yPenalty*5)).toFixed(1)}
+        function getAllGraphs() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.getAll();
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
 
-async function renderHome(){await loadGraphs();document.getElementById('total-count').textContent=graphs.length;document.getElementById('starred-count').textContent=graphs.filter(g=>g.starred).length;if(graphs.length>0){let totalScore=0,bestScore=-Infinity,bestName='--';graphs.forEach(g=>{const score=parseFloat(calculateScore(g));totalScore+=score;if(score>bestScore){bestScore=score;bestName=g.name.substring(0,6)}});document.getElementById('avg-score').textContent=(totalScore/graphs.length).toFixed(1);document.getElementById('best-match').textContent=bestName}renderRecentCards();renderStarredCards();renderComparisonChart()}
+        function saveGraphToDB(graphData) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.add(graphData);
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
 
-function renderRecentCards(){const container=document.getElementById('recent-cards');container.innerHTML='';if(graphs.length===0){container.innerHTML='<div class="empty-state" style="width:100%"><p style="color:var(--label-tertiary)">No graphs yet</p></div>';return}graphs.slice(0,5).forEach((graph,i)=>{const card=createGraphCard(graph,i===0);container.appendChild(card)})}
+        function deleteGraphFromDB(id) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.delete(id);
+                
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
 
-function renderStarredCards(){const container=document.getElementById('starred-cards');const section=document.getElementById('starred-section');const starred=graphs.filter(g=>g.starred);if(starred.length===0){section.style.display='none';return}section.style.display='block';container.innerHTML='';starred.forEach(graph=>{container.appendChild(createGraphCard(graph))})}
+        function updateGraphInDB(graphData) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.put(graphData);
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
 
-function createGraphCard(graph,featured=false){const card=document.createElement('div');card.className='graph-card'+(featured?' featured':'');const score=calculateScore(graph);card.innerHTML=`<div class="graph-card-canvas"><canvas></canvas></div><div class="graph-card-info"><div class="graph-card-name">${graph.name}</div><div class="graph-card-meta">Score: ${score}</div></div>`;card.onclick=()=>openDetail(graph);setTimeout(()=>{const canvas=card.querySelector('canvas');drawGraphPreview(canvas,graph.points)},10);return card}
+        // App State
+        let graphs = [];
+        let currentGraphIndex = 0;
+        let currentDetailGraph = null;
+        let showZones = false;
+        let drawingPoints = [];
+        let isDrawing = false;
+        let previousScreen = 'landing';
+        let longPressTimer = null;
+        let contextMenuGraph = null;
+        
+        // Toast Notification System
+        function showToast(message, type = 'info', duration = 2500) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
 
-function renderComparisonChart(){const canvas=document.getElementById('comparison-canvas');if(!canvas)return;const container=canvas.parentElement;const rect=container.getBoundingClientRect();const dpr=window.devicePixelRatio||1;canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;canvas.style.width=rect.width+'px';canvas.style.height=rect.height+'px';const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);const w=rect.width,h=rect.height,padding=40;ctx.fillStyle='#1c1c1e';ctx.fillRect(0,0,w,h);const graphW=w-padding*2,graphH=h-padding*2;ctx.fillStyle='rgba(48,209,88,0.1)';ctx.beginPath();ctx.moveTo(padding+graphW*0.5,padding);ctx.lineTo(padding+graphW,padding);ctx.lineTo(padding+graphW,padding+graphH*0.6);ctx.lineTo(padding+graphW*0.5,padding+graphH*0.6);ctx.closePath();ctx.fill();ctx.strokeStyle='#333';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(padding,h-padding);ctx.lineTo(w-padding,h-padding);ctx.moveTo(padding,h-padding);ctx.lineTo(padding,padding);ctx.stroke();ctx.fillStyle='#666';ctx.font='11px -apple-system,sans-serif';ctx.textAlign='center';ctx.fillText('Bonita →',w/2,h-10);ctx.save();ctx.translate(15,h/2);ctx.rotate(-Math.PI/2);ctx.fillText('Loca →',0,0);ctx.restore();ctx.setLineDash([5,5]);ctx.strokeStyle='#444';ctx.beginPath();ctx.moveTo(padding,h-padding);ctx.lineTo(w-padding,padding);ctx.stroke();ctx.setLineDash([]);const colors=['#0a84ff','#30d158','#ff9f0a','#ff453a','#bf5af2','#ff375f'];graphs.forEach((graph,i)=>{if(!graph.points||graph.points.length<2)return;let avgX=0,avgY=0;graph.points.forEach(p=>{avgX+=p.x;avgY+=p.y});avgX/=graph.points.length;avgY/=graph.points.length;const plotX=padding+avgX*graphW;const plotY=padding+(1-avgY)*graphH;const color=colors[i%colors.length];ctx.fillStyle=color;ctx.beginPath();ctx.arc(plotX,plotY,6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='9px -apple-system,sans-serif';ctx.fillText(graph.name.substring(0,6),plotX,plotY-10)})}
+        // Clear all data function
+        async function clearAllData() {
+            const allGraphs = await getAllGraphs();
+            if (allGraphs.length === 0) {
+                showToast('No data to clear', 'info');
+                return;
+            }
+            
+            if (confirm(`Delete all ${allGraphs.length} graphs? This cannot be undone.`)) {
+                for (const graph of allGraphs) {
+                    await deleteGraphFromDB(graph.id);
+                }
+                showToast('All data cleared', 'success');
+                renderBestChoices();
+                updateGraphCount();
+            }
+        }
 
-async function renderViewer(){await loadGraphs();if(viewMode==='swipe')renderSwipeView();else renderGalleryView()}
-function setViewMode(mode){viewMode=mode;document.querySelectorAll('.segment-btn').forEach((btn,i)=>btn.classList.toggle('active',i===(mode==='swipe'?0:1)));document.getElementById('swipe-view').style.display=mode==='swipe'?'flex':'none';document.getElementById('gallery-view').style.display=mode==='gallery'?'block':'none';if(mode==='swipe')renderSwipeView();else renderGalleryView()}
+        // Update graph count in settings
+        async function updateGraphCount() {
+            const allGraphs = await getAllGraphs();
+            const countEl = document.getElementById('graph-count-stat');
+            if (countEl) {
+                countEl.textContent = allGraphs.length;
+            }
+        }
 
-function renderSwipeView(){const card=document.getElementById('swipe-card');const dotsContainer=document.getElementById('swipe-dots');if(graphs.length===0){document.getElementById('swipe-name').textContent='No Graphs';document.getElementById('swipe-score').textContent='--';document.getElementById('swipe-rating').style.width='0%';dotsContainer.innerHTML='';return}if(currentSwipeIndex>=graphs.length)currentSwipeIndex=0;const graph=graphs[currentSwipeIndex];document.getElementById('swipe-name').textContent=graph.name;const score=calculateScore(graph);document.getElementById('swipe-score').textContent=score;document.getElementById('swipe-rating').style.width=(parseFloat(score)*10)+'%';setTimeout(()=>drawGraphPreview(document.getElementById('swipe-canvas'),graph.points),10);dotsContainer.innerHTML='';graphs.forEach((_,i)=>{const dot=document.createElement('div');dot.className='swipe-dot'+(i===currentSwipeIndex?' active':'');dotsContainer.appendChild(dot)});let startX=0,isSwiping=false;card.ontouchstart=(e)=>{startX=e.touches[0].clientX;isSwiping=false;card.style.transition='none'};card.ontouchmove=(e)=>{const diff=e.touches[0].clientX-startX;if(Math.abs(diff)>10)isSwiping=true;card.style.transform=`translateX(${diff*0.5}px) rotate(${diff*0.02}deg)`};card.ontouchend=(e)=>{card.style.transition='';card.style.transform='';const diff=startX-e.changedTouches[0].clientX;if(Math.abs(diff)>50){if(diff>0&&currentSwipeIndex<graphs.length-1){card.classList.add('swiping-left');setTimeout(()=>{currentSwipeIndex++;card.classList.remove('swiping-left');renderSwipeView()},300)}else if(diff<0&&currentSwipeIndex>0){card.classList.add('swiping-right');setTimeout(()=>{currentSwipeIndex--;card.classList.remove('swiping-right');renderSwipeView()},300)}}};card.onclick=(e)=>{if(!isSwiping)openDetail(graphs[currentSwipeIndex])}}
+        // Screen Navigation
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId + '-screen').classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll(`.nav-item[data-screen="${screenId}"]`).forEach(n => n.classList.add('active'));
+            
+            if (screenId === 'landing') {
+                renderBestChoices();
+            } else if (screenId === 'viewer') {
+                renderViewer();
+            } else if (screenId === 'maker') {
+                initMakerCanvas();
+            } else if (screenId === 'settings') {
+                updateGraphCount();
+            }
+        }
 
-function renderGalleryView(){const container=document.getElementById('gallery-grid');container.innerHTML='';if(graphs.length===0){container.innerHTML='<div class="empty-state" style="grid-column:span 2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="m6 17 5-7 4 4 5-8"/></svg><h3>No Graphs</h3><p>Create your first graph to get started</p></div>';return}graphs.forEach(graph=>{const item=document.createElement('div');item.className='gallery-item';item.innerHTML=`<canvas></canvas><div class="gallery-item-name">${graph.name}${graph.starred?' ⭐':''}</div>`;item.onclick=()=>openDetail(graph);container.appendChild(item);setTimeout(()=>drawGraphPreview(item.querySelector('canvas'),graph.points),10)})}
+        function goBack() {
+            showScreen(previousScreen);
+        }
 
-function openDetail(graph){currentGraph=graph;previousScreen=document.querySelector('.screen.active').id.replace('-screen','');document.getElementById('detail-name').textContent=graph.name;let avgX=0,avgY=0;if(graph.points&&graph.points.length>0){graph.points.forEach(p=>{avgX+=p.x;avgY+=p.y});avgX/=graph.points.length;avgY/=graph.points.length}document.getElementById('detail-hot').textContent=(avgX*10).toFixed(1);document.getElementById('detail-crazy').textContent=(avgY*10).toFixed(1);document.getElementById('detail-score').textContent=calculateScore(graph);document.getElementById('star-btn-text').textContent=graph.starred?'Unstar':'Star';document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));document.querySelector('.screen.active').classList.remove('active');document.getElementById('detail-screen').classList.add('active');setTimeout(()=>drawGraphPreview(document.getElementById('detail-canvas'),graph.points,true),50)}
-function closeDetail(){document.getElementById('detail-screen').classList.remove('active');showScreen(previousScreen)}
+        // Navigation Event Listeners
+        document.querySelectorAll('.nav-item').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const screen = btn.dataset.screen;
+                if (screen) showScreen(screen);
+            });
+        });
 
-async function toggleStar(){if(!currentGraph)return;currentGraph.starred=!currentGraph.starred;await updateGraphInDB(currentGraph);document.getElementById('star-btn-text').textContent=currentGraph.starred?'Unstar':'Star';showToast(currentGraph.starred?'⭐ Starred':'Removed star','success')}
-function editGraph(){if(!currentGraph)return;closeDetail();showScreen('create');drawingPoints=[...currentGraph.points.map(p=>({x:p.x,y:p.y}))];document.getElementById('graph-name-input').value=currentGraph.name;document.getElementById('save-btn').disabled=false;document.getElementById('canvas-hint').classList.add('hidden');setTimeout(()=>{const canvas=document.getElementById('create-canvas');redrawCreateCanvas()},100)}
-function confirmDelete(){showActionSheet('Delete Graph?','This action cannot be undone',[{label:'Delete',danger:true,action:async()=>{await deleteGraphFromDB(currentGraph.id);showToast('Graph deleted','success');closeDetail()}}])}
+        // Viewer Mode Toggle
+        document.getElementById('swipe-mode').addEventListener('click', () => {
+            document.getElementById('swipe-mode').classList.add('active');
+            document.getElementById('gallery-mode').classList.remove('active');
+            document.getElementById('swipe-view').style.display = 'flex';
+            document.getElementById('gallery-view').style.display = 'none';
+            document.getElementById('swipe-dots').style.display = 'flex';
+            renderSwipeView();
+        });
 
-let createCanvas,createCtx;
-function initCreateCanvas(){drawingPoints=[];document.getElementById('graph-name-input').value='';document.getElementById('save-btn').disabled=true;document.getElementById('canvas-hint').classList.remove('hidden');const wrapper=document.getElementById('create-canvas-wrapper');createCanvas=document.getElementById('create-canvas');const rect=wrapper.getBoundingClientRect();const dpr=window.devicePixelRatio||1;createCanvas.width=rect.width*dpr;createCanvas.height=rect.height*dpr;createCanvas.style.width=rect.width+'px';createCanvas.style.height=rect.height+'px';createCtx=createCanvas.getContext('2d');createCtx.scale(dpr,dpr);drawCreateBackground();createCanvas.ontouchstart=handleTouchStart;createCanvas.ontouchmove=handleTouchMove;createCanvas.ontouchend=handleTouchEnd;createCanvas.onmousedown=handleMouseDown;createCanvas.onmousemove=handleMouseMove;createCanvas.onmouseup=handleMouseUp}
+        document.getElementById('gallery-mode').addEventListener('click', () => {
+            document.getElementById('gallery-mode').classList.add('active');
+            document.getElementById('swipe-mode').classList.remove('active');
+            document.getElementById('swipe-view').style.display = 'none';
+            document.getElementById('gallery-view').style.display = 'grid';
+            document.getElementById('swipe-dots').style.display = 'none';
+            renderGalleryView();
+        });
 
-function drawCreateBackground(){const rect=createCanvas.parentElement.getBoundingClientRect();const w=rect.width,h=rect.height,padding=30;createCtx.clearRect(0,0,w,h);createCtx.strokeStyle='#333';createCtx.lineWidth=1;createCtx.beginPath();createCtx.moveTo(padding,padding);createCtx.lineTo(padding,h-padding);createCtx.lineTo(w-padding,h-padding);createCtx.stroke();createCtx.beginPath();createCtx.moveTo(padding,padding);createCtx.lineTo(padding-5,padding+10);createCtx.moveTo(padding,padding);createCtx.lineTo(padding+5,padding+10);createCtx.stroke();createCtx.beginPath();createCtx.moveTo(w-padding,h-padding);createCtx.lineTo(w-padding-10,h-padding-5);createCtx.moveTo(w-padding,h-padding);createCtx.lineTo(w-padding-10,h-padding+5);createCtx.stroke();createCtx.fillStyle='#666';createCtx.font='10px -apple-system,sans-serif';createCtx.fillText('LOCA',padding+5,padding+15);createCtx.fillText('BONITA',w-padding-30,h-padding-8)}
+        // Render Functions
+        async function loadGraphs() {
+            graphs = await getAllGraphs();
+            // Sort: starred first, then by timestamp
+            graphs.sort((a, b) => {
+                if (a.starred && !b.starred) return -1;
+                if (!a.starred && b.starred) return 1;
+                return b.timestamp - a.timestamp;
+            });
+        }
 
-function getCanvasPoint(e){const rect=createCanvas.getBoundingClientRect();const x=(e.clientX||e.touches[0].clientX)-rect.left;const y=(e.clientY||e.touches[0].clientY)-rect.top;return{x,y}}
-function handleTouchStart(e){e.preventDefault();isDrawing=true;drawingPoints=[];const point=getCanvasPoint(e);drawingPoints.push(point);document.getElementById('canvas-hint').classList.add('hidden')}
-function handleTouchMove(e){e.preventDefault();if(!isDrawing)return;drawingPoints.push(getCanvasPoint(e));redrawCreateCanvas()}
-function handleTouchEnd(e){e.preventDefault();isDrawing=false;smoothLine();redrawCreateCanvas();document.getElementById('save-btn').disabled=drawingPoints.length<3}
-function handleMouseDown(e){isDrawing=true;drawingPoints=[];drawingPoints.push(getCanvasPoint(e));document.getElementById('canvas-hint').classList.add('hidden')}
-function handleMouseMove(e){if(!isDrawing)return;drawingPoints.push(getCanvasPoint(e));redrawCreateCanvas()}
-function handleMouseUp(){isDrawing=false;smoothLine();redrawCreateCanvas();document.getElementById('save-btn').disabled=drawingPoints.length<3}
+        async function renderBestChoices() {
+            await loadGraphs();
+            const container = document.getElementById('best-choices');
+            container.innerHTML = '';
+            cardIndex = 0;
+            
+            if (graphs.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="grid-column: span 3; padding: 40px;"><p>No graphs yet</p></div>';
+                renderComparisonChart();
+                return;
+            }
+            
+            graphs.slice(0, 6).forEach(graph => {
+                const card = createGraphCard(graph);
+                container.appendChild(card);
+            });
+            
+            renderComparisonChart();
+        }
+        
+        function renderComparisonChart() {
+            const canvas = document.getElementById('comparison-canvas');
+            if (!canvas) return;
+            
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+            
+            const w = rect.width;
+            const h = rect.height;
+            const padding = 40;
+            
+            ctx.clearRect(0, 0, w, h);
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            
+            // Y axis (Crazy/Loca)
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, h - padding);
+            ctx.stroke();
+            
+            // X axis (Hot/Bonita)
+            ctx.beginPath();
+            ctx.moveTo(padding, h - padding);
+            ctx.lineTo(w - padding, h - padding);
+            ctx.stroke();
+            
+            // Axis labels
+            ctx.fillStyle = '#666';
+            ctx.font = '10px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Bonita →', w / 2, h - 8);
+            
+            ctx.save();
+            ctx.translate(12, h / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Loca →', 0, 0);
+            ctx.restore();
+            
+            // Draw ideal zone (wife zone: high hot, medium crazy)
+            const graphW = w - padding * 2;
+            const graphH = h - padding * 2;
+            
+            ctx.fillStyle = 'rgba(74, 222, 128, 0.1)';
+            ctx.beginPath();
+            ctx.moveTo(padding + graphW * 0.7, h - padding);
+            ctx.lineTo(w - padding, h - padding);
+            ctx.lineTo(w - padding, padding + graphH * 0.3);
+            ctx.lineTo(padding + graphW * 0.7, padding + graphH * 0.5);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.fillStyle = 'rgba(74, 222, 128, 0.3)';
+            ctx.font = '9px -apple-system, sans-serif';
+            ctx.fillText('IDEAL', padding + graphW * 0.85, padding + graphH * 0.4);
+            
+            // Draw diagonal line (hot-crazy line)
+            ctx.strokeStyle = 'rgba(255, 100, 100, 0.3)';
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(padding, h - padding);
+            ctx.lineTo(w - padding, padding);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            if (graphs.length === 0) {
+                ctx.fillStyle = '#555';
+                ctx.font = '12px -apple-system, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Add graphs to see comparison', w / 2, h / 2);
+                return;
+            }
+            
+            // Calculate average position for each graph and plot as scatter points
+            const colors = ['#4ade80', '#60a5fa', '#f472b6', '#facc15', '#a78bfa', '#fb923c', '#22d3d8', '#e879f9'];
+            
+            graphs.forEach((graph, i) => {
+                if (!graph.points || graph.points.length < 2) return;
+                
+                // Calculate average x (hot) and y (crazy) for this graph
+                let avgX = 0, avgY = 0;
+                graph.points.forEach(p => {
+                    avgX += p.x;
+                    avgY += p.y;
+                });
+                avgX /= graph.points.length;
+                avgY /= graph.points.length;
+                
+                // Convert to canvas coordinates
+                const plotX = padding + avgX * graphW;
+                const plotY = padding + (1 - avgY) * graphH;
+                
+                const color = colors[i % colors.length];
+                
+                // Draw point with glow
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 8;
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(plotX, plotY, 6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                
+                // Draw name label
+                ctx.fillStyle = '#fff';
+                ctx.font = '9px -apple-system, sans-serif';
+                ctx.textAlign = 'center';
+                const labelY = plotY - 12;
+                ctx.fillText(graph.name.substring(0, 8), plotX, labelY < padding + 10 ? plotY + 16 : labelY);
+            });
+            
+            // Find and highlight the best fit (highest x, moderate y around 0.4-0.6)
+            let bestGraph = null;
+            let bestScore = -Infinity;
+            
+            graphs.forEach(graph => {
+                if (!graph.points || graph.points.length < 2) return;
+                
+                let avgX = 0, avgY = 0;
+                graph.points.forEach(p => {
+                    avgX += p.x;
+                    avgY += p.y;
+                });
+                avgX /= graph.points.length;
+                avgY /= graph.points.length;
+                
+                // Score: high x is good, y around 0.4-0.5 is ideal (controlled crazy)
+                const yPenalty = Math.abs(avgY - 0.45) * 2;
+                const score = avgX - yPenalty;
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestGraph = graph;
+                }
+            });
+            
+            if (bestGraph) {
+                let avgX = 0, avgY = 0;
+                bestGraph.points.forEach(p => {
+                    avgX += p.x;
+                    avgY += p.y;
+                });
+                avgX /= bestGraph.points.length;
+                avgY /= bestGraph.points.length;
+                
+                const plotX = padding + avgX * graphW;
+                const plotY = padding + (1 - avgY) * graphH;
+                
+                // Draw crown/star indicator for best
+                ctx.strokeStyle = '#facc15';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(plotX, plotY, 12, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
 
-function redrawCreateCanvas(){drawCreateBackground();if(drawingPoints.length<2)return;createCtx.strokeStyle='#fff';createCtx.lineWidth=2;createCtx.lineCap='round';createCtx.lineJoin='round';createCtx.beginPath();createCtx.moveTo(drawingPoints[0].x,drawingPoints[0].y);for(let i=1;i<drawingPoints.length;i++){createCtx.lineTo(drawingPoints[i].x,drawingPoints[i].y)}createCtx.stroke()}
+        let cardIndex = 0;
+        
+        function createGraphCard(graph) {
+            const card = document.createElement('div');
+            card.className = 'graph-card';
+            card.style.setProperty('--card-index', cardIndex++);
+            card.innerHTML = `
+                <div class="graph-card-preview">
+                    <canvas></canvas>
+                </div>
+                <div class="graph-card-name">${graph.name}</div>
+            `;
+            
+            let pressTimer = null;
+            let didLongPress = false;
+            
+            const startPress = (e) => {
+                didLongPress = false;
+                pressTimer = setTimeout(() => {
+                    didLongPress = true;
+                    showContextMenu(graph);
+                    if (navigator.vibrate) navigator.vibrate(50);
+                }, 500);
+            };
+            
+            const endPress = (e) => {
+                clearTimeout(pressTimer);
+                if (!didLongPress) {
+                    openDetail(graph);
+                }
+            };
+            
+            const cancelPress = () => {
+                clearTimeout(pressTimer);
+            };
+            
+            card.addEventListener('touchstart', startPress, { passive: true });
+            card.addEventListener('touchend', endPress);
+            card.addEventListener('touchmove', cancelPress);
+            card.addEventListener('mousedown', startPress);
+            card.addEventListener('mouseup', endPress);
+            card.addEventListener('mouseleave', cancelPress);
+            
+            setTimeout(() => {
+                const canvas = card.querySelector('canvas');
+                drawGraphPreview(canvas, graph.points, false);
+            }, 10);
+            
+            return card;
+        }
 
-function smoothLine(){if(drawingPoints.length<3)return;const rect=createCanvas.parentElement.getBoundingClientRect();const padding=30;const leftX=padding,rightX=rect.width-padding,bottomY=rect.height-padding;let smoothed=drawingPoints;for(let pass=0;pass<2;pass++){const result=[];const half=2;for(let i=0;i<smoothed.length;i++){let sumX=0,sumY=0,count=0;for(let j=-half;j<=half;j++){const idx=Math.max(0,Math.min(smoothed.length-1,i+j));sumX+=smoothed[idx].x;sumY+=smoothed[idx].y;count++}result.push({x:sumX/count,y:sumY/count})}smoothed=result}if(smoothed.length>0&&smoothed[0].x>leftX+5){smoothed.unshift({x:leftX,y:bottomY})}if(smoothed.length>1&&smoothed[smoothed.length-1].x<rightX-5){smoothed.push({x:rightX,y:smoothed[smoothed.length-1].y})}drawingPoints=smoothed}
+        // Context Menu Functions
+        function showContextMenu(graph) {
+            contextMenuGraph = graph;
+            document.getElementById('modal-graph-name').textContent = graph.name;
+            document.getElementById('rename-input').value = graph.name;
+            document.getElementById('star-btn').textContent = graph.starred ? '⭐ Unstar Graph' : '⭐ Star Graph';
+            document.getElementById('context-modal').classList.add('active');
+        }
 
-function clearCanvas(){drawingPoints=[];document.getElementById('save-btn').disabled=true;document.getElementById('canvas-hint').classList.remove('hidden');drawCreateBackground()}
+        function hideModal() {
+            document.getElementById('context-modal').classList.remove('active');
+            contextMenuGraph = null;
+        }
 
-async function saveGraph(){const name=document.getElementById('graph-name-input').value.trim()||'Untitled';if(drawingPoints.length<3){showToast('Draw a line first','error');return}const rect=createCanvas.parentElement.getBoundingClientRect();const padding=30;const graphW=rect.width-padding*2;const graphH=rect.height-padding*2;const normalizedPoints=drawingPoints.map(p=>({x:Math.max(0,Math.min(1,(p.x-padding)/graphW)),y:Math.max(0,Math.min(1,1-(p.y-padding)/graphH))}));if(currentGraph){currentGraph.name=name;currentGraph.points=normalizedPoints;currentGraph.timestamp=Date.now();await updateGraphInDB(currentGraph);currentGraph=null}else{await saveGraphToDB({name,points:normalizedPoints,timestamp:Date.now(),starred:false})}clearCanvas();document.getElementById('graph-name-input').value='';showToast('Graph saved!','success');showScreen('home')}
+        function closeModal(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                autoSaveAndClose();
+            }
+        }
+        
+        async function autoSaveAndClose() {
+            const input = document.getElementById('rename-input');
+            if (contextMenuGraph && input.value.trim() && input.value.trim() !== contextMenuGraph.name) {
+                contextMenuGraph.name = input.value.trim();
+                await updateGraphInDB(contextMenuGraph);
+                showToast('Name saved', 'success', 1500);
+                
+                // Refresh views
+                const activeScreen = document.querySelector('.screen.active').id;
+                if (activeScreen === 'landing-screen') {
+                    renderBestChoices();
+                } else if (activeScreen === 'viewer-screen') {
+                    renderViewer();
+                }
+            }
+            hideModal();
+        }
 
-function drawGraphPreview(canvas,points,withZones=false){if(!canvas)return;const container=canvas.parentElement;const rect=container.getBoundingClientRect();const dpr=window.devicePixelRatio||1;canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;canvas.style.width=rect.width+'px';canvas.style.height=rect.height+'px';const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);const w=rect.width,h=rect.height;const padding=Math.min(w,h)<150?12:25;ctx.fillStyle='#1c1c1e';ctx.fillRect(0,0,w,h);const graphW=w-padding*2,graphH=h-padding*2;if(withZones){ctx.setLineDash([4,4]);ctx.strokeStyle='#444';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(padding,h-padding);ctx.lineTo(w-padding,padding);ctx.stroke();ctx.setLineDash([])}ctx.strokeStyle='#333';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(padding,padding);ctx.lineTo(padding,h-padding);ctx.lineTo(w-padding,h-padding);ctx.stroke();if(!points||points.length<2)return;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();const startX=padding+points[0].x*graphW;const startY=padding+(1-points[0].y)*graphH;ctx.moveTo(startX,startY);for(let i=1;i<points.length;i++){const x=padding+points[i].x*graphW;const y=padding+(1-points[i].y)*graphH;ctx.lineTo(x,y)}ctx.stroke()}
+        async function saveRename() {
+            if (!contextMenuGraph) return;
+            
+            const newName = document.getElementById('rename-input').value.trim();
+            if (!newName) {
+                hideModal();
+                return;
+            }
+            
+            contextMenuGraph.name = newName;
+            await updateGraphInDB(contextMenuGraph);
+            
+            hideModal();
+            
+            // Refresh current view
+            const activeScreen = document.querySelector('.screen.active').id;
+            if (activeScreen === 'landing-screen') {
+                renderBestChoices();
+            } else if (activeScreen === 'viewer-screen') {
+                renderViewer();
+            } else if (activeScreen === 'detail-screen') {
+                document.getElementById('detail-name').textContent = newName;
+            }
+        }
 
-function showToast(message,type='success'){const toast=document.getElementById('toast');toast.textContent=message;toast.className='toast '+type+' show';setTimeout(()=>toast.classList.remove('show'),2500)}
+        async function confirmDelete() {
+            if (!contextMenuGraph) return;
+            
+            hideModal();
+            
+            // Show delete confirmation
+            setTimeout(async () => {
+                if (confirm(`Delete "${contextMenuGraph.name}"?`)) {
+                    await deleteGraphFromDB(contextMenuGraph.id);
+                    
+                    // Refresh current view
+                    const activeScreen = document.querySelector('.screen.active').id;
+                    if (activeScreen === 'detail-screen') {
+                        goBack();
+                    } else {
+                        renderBestChoices();
+                        renderViewer();
+                    }
+                }
+            }, 100);
+        }
 
-function showActionSheet(title,message,buttons){document.getElementById('action-sheet-title').textContent=title;const buttonsContainer=document.getElementById('action-sheet-buttons');buttonsContainer.innerHTML='';buttons.forEach(btn=>{const button=document.createElement('button');button.className='action-sheet-btn'+(btn.danger?' danger':'');button.textContent=btn.label;button.onclick=()=>{hideActionSheet();btn.action()};buttonsContainer.appendChild(button)});document.getElementById('action-sheet').classList.add('active')}
-function hideActionSheet(){document.getElementById('action-sheet').classList.remove('active')}
-function closeActionSheet(e){if(e.target.classList.contains('action-sheet-overlay'))hideActionSheet()}
+        async function toggleStar() {
+            if (!contextMenuGraph) return;
+            
+            contextMenuGraph.starred = !contextMenuGraph.starred;
+            await updateGraphInDB(contextMenuGraph);
+            
+            // Update button text
+            document.getElementById('star-btn').textContent = contextMenuGraph.starred ? '⭐ Unstar Graph' : '⭐ Star Graph';
+            
+            // Refresh views
+            renderBestChoices();
+        }
 
-async function exportData(){await loadGraphs();const data={version:'2.0',exported:new Date().toISOString(),graphs};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='locas-backup-'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(url);showToast('Data exported!','success')}
-async function importData(event){const file=event.target.files[0];if(!file)return;try{const text=await file.text();const data=JSON.parse(text);if(!data.graphs||!Array.isArray(data.graphs)){showToast('Invalid backup file','error');return}let imported=0;for(const graph of data.graphs){if(graph.name&&graph.points){await saveGraphToDB({name:graph.name,points:graph.points,timestamp:graph.timestamp||Date.now(),starred:graph.starred||false});imported++}}showToast(`Imported ${imported} graphs`,'success');renderHome()}catch(e){showToast('Error reading file','error')}event.target.value=''}
-function confirmDeleteAll(){showActionSheet('Delete All Data?','This will permanently delete all your graphs',[{label:'Delete Everything',danger:true,action:async()=>{await deleteAllGraphs();showToast('All data deleted','success');renderHome()}}])}
+        let editingGraphId = null;
 
-initDB().then(()=>renderHome());
-</script>
+        function editGraph() {
+            if (!contextMenuGraph) return;
+            
+            editingGraphId = contextMenuGraph.id;
+            hideModal();
+            
+            // Go to maker screen with existing points loaded
+            showScreen('maker');
+            
+            // Load the graph data into maker
+            setTimeout(() => {
+                document.getElementById('graph-name').value = contextMenuGraph.name;
+                
+                // Convert normalized points back to canvas coordinates
+                const rect = makerCanvas.parentElement.getBoundingClientRect();
+                const padding = 30;
+                const graphW = rect.width - padding * 2;
+                const graphH = rect.height - padding * 2;
+                
+                drawingPoints = contextMenuGraph.points.map(p => ({
+                    x: padding + p.x * graphW,
+                    y: padding + (1 - p.y) * graphH
+                }));
+                
+                redrawMaker();
+            }, 100);
+        }
+
+        function renderViewer() {
+            loadGraphs().then(() => {
+                if (document.getElementById('swipe-mode').classList.contains('active')) {
+                    renderSwipeView();
+                } else {
+                    renderGalleryView();
+                }
+            });
+        }
+
+        function renderSwipeView() {
+            const dotsContainer = document.getElementById('swipe-dots');
+            dotsContainer.innerHTML = '';
+            
+            if (graphs.length === 0) {
+                document.getElementById('swipe-name').textContent = 'No graphs';
+                const canvas = document.getElementById('swipe-canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+            
+            // Ensure index is valid
+            if (currentGraphIndex >= graphs.length) currentGraphIndex = graphs.length - 1;
+            if (currentGraphIndex < 0) currentGraphIndex = 0;
+            
+            graphs.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'swipe-dot' + (i === currentGraphIndex ? ' active' : '');
+                dot.addEventListener('click', () => {
+                    currentGraphIndex = i;
+                    renderSwipeView();
+                });
+                dotsContainer.appendChild(dot);
+            });
+            
+            const graph = graphs[currentGraphIndex];
+            document.getElementById('swipe-name').textContent = graph.name;
+            
+            const canvas = document.getElementById('swipe-canvas');
+            drawGraphPreview(canvas, graph.points, false);
+            
+            // Swipe gestures
+            const swipeCard = document.querySelector('.swipe-card');
+            let startX = 0;
+            let isSwiping = false;
+            
+            swipeCard.ontouchstart = (e) => {
+                startX = e.touches[0].clientX;
+                isSwiping = false;
+                swipeCard.style.transition = 'none';
+            };
+            
+            swipeCard.ontouchmove = (e) => {
+                const currentX = e.touches[0].clientX;
+                const diff = currentX - startX;
+                if (Math.abs(diff) > 10) {
+                    isSwiping = true;
+                }
+            };
+            
+            swipeCard.ontouchend = (e) => {
+                const endX = e.changedTouches[0].clientX;
+                const diff = startX - endX;
+                
+                swipeCard.style.transition = '';
+                
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0 && currentGraphIndex < graphs.length - 1) {
+                        swipeCard.classList.add('swiping-left');
+                        setTimeout(() => {
+                            currentGraphIndex++;
+                            swipeCard.classList.remove('swiping-left');
+                            renderSwipeView();
+                        }, 300);
+                    } else if (diff < 0 && currentGraphIndex > 0) {
+                        swipeCard.classList.add('swiping-right');
+                        setTimeout(() => {
+                            currentGraphIndex--;
+                            swipeCard.classList.remove('swiping-right');
+                            renderSwipeView();
+                        }, 300);
+                    }
+                }
+            };
+            
+            swipeCard.onclick = (e) => {
+                if (!isSwiping) openDetail(graph);
+            };
+        }
+
+        function renderGalleryView() {
+            const container = document.getElementById('gallery-view');
+            container.innerHTML = '';
+            cardIndex = 0;
+            
+            if (graphs.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="grid-column: span 3; padding: 40px;"><p>No graphs yet</p></div>';
+                return;
+            }
+            
+            graphs.forEach(graph => {
+                const card = createGraphCard(graph);
+                container.appendChild(card);
+            });
+        }
+
+        // Detail View
+        function openDetail(graph) {
+            currentDetailGraph = graph;
+            previousScreen = document.querySelector('.screen.active').id.replace('-screen', '');
+            document.getElementById('detail-name').textContent = graph.name;
+            showScreen('detail');
+            
+            setTimeout(() => {
+                const canvas = document.getElementById('detail-canvas');
+                drawGraphPreview(canvas, graph.points, showZones);
+            }, 50);
+        }
+
+        function toggleZones() {
+            showZones = !showZones;
+            document.getElementById('zone-toggle').classList.toggle('active', showZones);
+            
+            const canvas = document.getElementById('detail-canvas');
+            drawGraphPreview(canvas, currentDetailGraph.points, showZones);
+        }
+
+        // Graph Drawing
+        function drawGraphPreview(canvas, points, withZones) {
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+            
+            const w = rect.width;
+            const h = rect.height;
+            // Use smaller padding for small preview cards
+            const padding = Math.min(w, h) < 150 ? 10 : 30;
+            
+            ctx.clearRect(0, 0, w, h);
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            
+            // Y axis
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, h - padding);
+            ctx.stroke();
+            
+            // X axis
+            ctx.beginPath();
+            ctx.moveTo(padding, h - padding);
+            ctx.lineTo(w - padding, h - padding);
+            ctx.stroke();
+            
+            // Arrows
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding - 5, padding + 10);
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding + 5, padding + 10);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(w - padding, h - padding);
+            ctx.lineTo(w - padding - 10, h - padding - 5);
+            ctx.moveTo(w - padding, h - padding);
+            ctx.lineTo(w - padding - 10, h - padding + 5);
+            ctx.stroke();
+            
+            // Zone overlays
+            if (withZones) {
+                const graphW = w - padding * 2;
+                const graphH = h - padding * 2;
+                
+                ctx.strokeStyle = '#444';
+                ctx.setLineDash([5, 5]);
+                ctx.lineWidth = 1;
+                
+                // Horizontal line at crazy = 5 (middle)
+                const y5 = padding + graphH * 0.5;
+                ctx.beginPath();
+                ctx.moveTo(padding, y5);
+                ctx.lineTo(w - padding, y5);
+                ctx.stroke();
+                
+                // Diagonal line (hot-crazy line)
+                ctx.beginPath();
+                ctx.moveTo(padding, h - padding);
+                ctx.lineTo(w - padding, padding);
+                ctx.stroke();
+                
+                // Vertical line at hot = 5
+                const x5 = padding + graphW * 0.5;
+                ctx.beginPath();
+                ctx.moveTo(x5, padding);
+                ctx.lineTo(x5, h - padding);
+                ctx.stroke();
+                
+                // Vertical line at hot = 8
+                const x8 = padding + graphW * 0.8;
+                ctx.beginPath();
+                ctx.moveTo(x8, padding);
+                ctx.lineTo(x8, h - padding);
+                ctx.stroke();
+                
+                ctx.setLineDash([]);
+                
+                // Zone labels
+                ctx.fillStyle = '#555';
+                ctx.font = '10px -apple-system, sans-serif';
+                ctx.fillText('NO GO', padding + 10, padding + 30);
+                ctx.fillText('DANGER', padding + graphW * 0.3, padding + 20);
+                ctx.fillText('FUN', padding + graphW * 0.5 + 5, padding + graphH * 0.5 - 10);
+                ctx.fillText('DATE', padding + graphW * 0.7, padding + graphH * 0.3);
+                ctx.fillText('WIFE', padding + graphW * 0.8 + 5, padding + graphH * 0.6);
+                ctx.fillText('UNICORNS', padding + graphW * 0.8 + 5, h - padding - 15);
+            }
+            
+            // Draw the line
+            if (points && points.length > 1) {
+                const graphW = w - padding * 2;
+                const graphH = h - padding * 2;
+                
+                const scaledPoints = points.map(p => ({
+                    x: padding + p.x * graphW,
+                    y: padding + (1 - p.y) * graphH
+                }));
+                
+                // Draw glow effect for better visibility
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.lineWidth = 6;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                ctx.moveTo(scaledPoints[0].x, scaledPoints[0].y);
+                for (let i = 1; i < scaledPoints.length; i++) {
+                    ctx.lineTo(scaledPoints[i].x, scaledPoints[i].y);
+                }
+                ctx.stroke();
+                
+                // Draw main line
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(scaledPoints[0].x, scaledPoints[0].y);
+                for (let i = 1; i < scaledPoints.length; i++) {
+                    ctx.lineTo(scaledPoints[i].x, scaledPoints[i].y);
+                }
+                ctx.stroke();
+                
+                // Draw start point indicator
+                ctx.fillStyle = '#4ade80';
+                ctx.beginPath();
+                ctx.arc(scaledPoints[0].x, scaledPoints[0].y, 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw end point indicator
+                ctx.fillStyle = '#f87171';
+                ctx.beginPath();
+                ctx.arc(scaledPoints[scaledPoints.length - 1].x, scaledPoints[scaledPoints.length - 1].y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Maker Canvas
+        let makerCanvas, makerCtx;
+
+        function initMakerCanvas() {
+            drawingPoints = [];
+            document.getElementById('graph-name').value = '';
+            
+            const container = document.querySelector('.maker-canvas-container');
+            makerCanvas = document.getElementById('maker-canvas');
+            
+            const rect = container.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            makerCanvas.width = rect.width * dpr;
+            makerCanvas.height = rect.height * dpr;
+            makerCanvas.style.width = rect.width + 'px';
+            makerCanvas.style.height = rect.height + 'px';
+            
+            makerCtx = makerCanvas.getContext('2d');
+            makerCtx.scale(dpr, dpr);
+            
+            drawMakerBackground();
+            
+            // Touch events
+            makerCanvas.ontouchstart = handleTouchStart;
+            makerCanvas.ontouchmove = handleTouchMove;
+            makerCanvas.ontouchend = handleTouchEnd;
+            
+            // Mouse events (for testing)
+            makerCanvas.onmousedown = handleMouseDown;
+            makerCanvas.onmousemove = handleMouseMove;
+            makerCanvas.onmouseup = handleMouseUp;
+        }
+
+        function drawMakerBackground() {
+            const rect = makerCanvas.parentElement.getBoundingClientRect();
+            const w = rect.width;
+            const h = rect.height;
+            const padding = 30;
+            
+            makerCtx.clearRect(0, 0, w, h);
+            
+            // Grid
+            makerCtx.strokeStyle = '#222';
+            makerCtx.lineWidth = 0.5;
+            
+            const gridSize = 20;
+            for (let x = padding; x <= w - padding; x += gridSize) {
+                makerCtx.beginPath();
+                makerCtx.moveTo(x, padding);
+                makerCtx.lineTo(x, h - padding);
+                makerCtx.stroke();
+            }
+            for (let y = padding; y <= h - padding; y += gridSize) {
+                makerCtx.beginPath();
+                makerCtx.moveTo(padding, y);
+                makerCtx.lineTo(w - padding, y);
+                makerCtx.stroke();
+            }
+            
+            // Axes
+            makerCtx.strokeStyle = '#444';
+            makerCtx.lineWidth = 1;
+            
+            makerCtx.beginPath();
+            makerCtx.moveTo(padding, padding);
+            makerCtx.lineTo(padding, h - padding);
+            makerCtx.lineTo(w - padding, h - padding);
+            makerCtx.stroke();
+            
+            // Arrows
+            makerCtx.beginPath();
+            makerCtx.moveTo(padding, padding);
+            makerCtx.lineTo(padding - 5, padding + 10);
+            makerCtx.moveTo(padding, padding);
+            makerCtx.lineTo(padding + 5, padding + 10);
+            makerCtx.stroke();
+            
+            makerCtx.beginPath();
+            makerCtx.moveTo(w - padding, h - padding);
+            makerCtx.lineTo(w - padding - 10, h - padding - 5);
+            makerCtx.moveTo(w - padding, h - padding);
+            makerCtx.lineTo(w - padding - 10, h - padding + 5);
+            makerCtx.stroke();
+        }
+
+        function getCanvasPoint(e) {
+            const rect = makerCanvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            return { x, y };
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            isDrawing = true;
+            drawingPoints = [];
+            const point = getCanvasPoint(e);
+            drawingPoints.push(point);
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const point = getCanvasPoint(e);
+            drawingPoints.push(point);
+            redrawMaker();
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            isDrawing = false;
+            smoothLine();
+            redrawMaker();
+        }
+
+        function handleMouseDown(e) {
+            isDrawing = true;
+            drawingPoints = [];
+            const point = getCanvasPoint(e);
+            drawingPoints.push(point);
+        }
+
+        function handleMouseMove(e) {
+            if (!isDrawing) return;
+            const point = getCanvasPoint(e);
+            drawingPoints.push(point);
+            redrawMaker();
+        }
+
+        function handleMouseUp(e) {
+            isDrawing = false;
+            smoothLine();
+            redrawMaker();
+        }
+
+        function redrawMaker() {
+            drawMakerBackground();
+            
+            if (drawingPoints.length < 2) return;
+            
+            makerCtx.strokeStyle = '#fff';
+            makerCtx.lineWidth = 2;
+            makerCtx.lineCap = 'round';
+            makerCtx.lineJoin = 'round';
+            makerCtx.beginPath();
+            makerCtx.moveTo(drawingPoints[0].x, drawingPoints[0].y);
+            
+            for (let i = 1; i < drawingPoints.length; i++) {
+                makerCtx.lineTo(drawingPoints[i].x, drawingPoints[i].y);
+            }
+            
+            makerCtx.stroke();
+        }
+
+        // Line smoothing pipeline
+        function smoothLine() {
+            if (drawingPoints.length < 3) return;
+            
+            const rect = makerCanvas.parentElement.getBoundingClientRect();
+            const padding = 30;
+            const leftX = padding;
+            const rightX = rect.width - padding;
+            const bottomY = rect.height - padding;
+            
+            // Step 1: Apply moving average filter for initial smoothing
+            let smoothed = drawingPoints;
+            for (let pass = 0; pass < 2; pass++) {
+                smoothed = movingAverageSmooth(smoothed, 5);
+            }
+            
+            // Step 2: Simplify with RDP
+            smoothed = rdpSimplify(smoothed, 5);
+            
+            // Step 3: Apply Chaikin's corner cutting for smooth curves
+            for (let i = 0; i < 3; i++) {
+                smoothed = chaikinSmooth(smoothed);
+            }
+            
+            // Step 4: Ensure line starts at left edge (x=0) at bottom (y=max)
+            if (smoothed.length > 0) {
+                const first = smoothed[0];
+                if (first.x > leftX + 5) {
+                    // Add starting point at origin (left edge, bottom)
+                    smoothed.unshift({ x: leftX, y: bottomY });
+                } else {
+                    // Snap first point to left edge
+                    smoothed[0] = { x: leftX, y: first.y };
+                }
+            }
+            
+            // Step 5: Ensure line ends at right edge
+            if (smoothed.length > 1) {
+                const last = smoothed[smoothed.length - 1];
+                if (last.x < rightX - 5) {
+                    // Extend to right edge maintaining trend
+                    smoothed.push({ x: rightX, y: last.y });
+                } else {
+                    // Snap last point to right edge
+                    smoothed[smoothed.length - 1] = { x: rightX, y: last.y };
+                }
+            }
+            
+            drawingPoints = smoothed;
+        }
+
+        // Auto-complete line to graph edges by extrapolating the trend
+        function autoCompleteLine(points) {
+            if (points.length < 5) return points;
+            
+            const rect = makerCanvas.parentElement.getBoundingClientRect();
+            const padding = 30;
+            const minX = padding;
+            const maxX = rect.width - padding;
+            const minY = padding;
+            const maxY = rect.height - padding;
+            
+            let result = [...points];
+            
+            // Check and extend START of line (left edge)
+            const firstPoint = result[0];
+            if (firstPoint.x > minX + 20) {
+                // Calculate trend from first few points
+                const trendPoints = result.slice(0, Math.min(10, Math.floor(result.length / 3)));
+                const trend = calculateTrend(trendPoints);
+                
+                // Extrapolate backwards to left edge
+                const extendedStart = extrapolateToEdge(firstPoint, trend, minX, minY, maxY, 'start');
+                result = [...extendedStart, ...result];
+            }
+            
+            // Check and extend END of line (right edge)
+            const lastPoint = result[result.length - 1];
+            if (lastPoint.x < maxX - 20) {
+                // Calculate trend from last few points
+                const trendPoints = result.slice(-Math.min(10, Math.floor(result.length / 3)));
+                const trend = calculateTrend(trendPoints);
+                
+                // Extrapolate forwards to right edge
+                const extendedEnd = extrapolateToEdge(lastPoint, trend, maxX, minY, maxY, 'end');
+                result = [...result, ...extendedEnd];
+            }
+            
+            return result;
+        }
+
+        // Calculate the trend (slope) from a set of points using linear regression
+        function calculateTrend(points) {
+            if (points.length < 2) return { dx: 1, dy: 0 };
+            
+            const n = points.length;
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            
+            for (const p of points) {
+                sumX += p.x;
+                sumY += p.y;
+                sumXY += p.x * p.y;
+                sumX2 += p.x * p.x;
+            }
+            
+            const denominator = n * sumX2 - sumX * sumX;
+            if (Math.abs(denominator) < 0.001) {
+                // Vertical line
+                return { dx: 0, dy: points[n-1].y > points[0].y ? 1 : -1 };
+            }
+            
+            const slope = (n * sumXY - sumX * sumY) / denominator;
+            
+            // Normalize to unit vector
+            const mag = Math.sqrt(1 + slope * slope);
+            return { dx: 1 / mag, dy: slope / mag };
+        }
+
+        // Extrapolate from a point along a trend to reach the target X
+        function extrapolateToEdge(startPoint, trend, targetX, minY, maxY, direction) {
+            const points = [];
+            const step = 5; // pixels per step
+            
+            let currentX = startPoint.x;
+            let currentY = startPoint.y;
+            
+            // Determine direction multiplier
+            const dirMult = direction === 'start' ? -1 : 1;
+            
+            // Calculate how many steps needed
+            const distance = Math.abs(targetX - currentX);
+            const steps = Math.ceil(distance / step);
+            
+            if (steps === 0) return points;
+            
+            // Calculate step increments
+            const xStep = (targetX - currentX) / steps;
+            const yStep = xStep * (trend.dy / (trend.dx || 0.001));
+            
+            for (let i = 1; i <= steps; i++) {
+                const newX = currentX + xStep * i;
+                let newY = currentY + yStep * i;
+                
+                // Clamp Y to graph boundaries
+                newY = Math.max(minY, Math.min(maxY, newY));
+                
+                if (direction === 'start') {
+                    points.unshift({ x: newX, y: newY });
+                } else {
+                    points.push({ x: newX, y: newY });
+                }
+            }
+            
+            return points;
+        }
+
+        // Moving average filter - smooths out jitter
+        function movingAverageSmooth(points, windowSize) {
+            if (points.length < windowSize) return points;
+            
+            const result = [];
+            const half = Math.floor(windowSize / 2);
+            
+            for (let i = 0; i < points.length; i++) {
+                let sumX = 0, sumY = 0, count = 0;
+                
+                for (let j = -half; j <= half; j++) {
+                    const idx = Math.max(0, Math.min(points.length - 1, i + j));
+                    sumX += points[idx].x;
+                    sumY += points[idx].y;
+                    count++;
+                }
+                
+                result.push({ x: sumX / count, y: sumY / count });
+            }
+            
+            // Preserve endpoints
+            result[0] = { ...points[0] };
+            result[result.length - 1] = { ...points[points.length - 1] };
+            
+            return result;
+        }
+
+        // Chaikin's corner cutting algorithm - creates smooth curves
+        function chaikinSmooth(points) {
+            if (points.length < 3) return points;
+            
+            const result = [points[0]]; // Keep first point
+            
+            for (let i = 0; i < points.length - 1; i++) {
+                const p0 = points[i];
+                const p1 = points[i + 1];
+                
+                // Q point (25% along segment)
+                result.push({
+                    x: 0.75 * p0.x + 0.25 * p1.x,
+                    y: 0.75 * p0.y + 0.25 * p1.y
+                });
+                
+                // R point (75% along segment)
+                result.push({
+                    x: 0.25 * p0.x + 0.75 * p1.x,
+                    y: 0.25 * p0.y + 0.75 * p1.y
+                });
+            }
+            
+            result.push(points[points.length - 1]); // Keep last point
+            return result;
+        }
+
+        function rdpSimplify(points, epsilon) {
+            if (points.length < 3) return points;
+            
+            let maxDist = 0;
+            let index = 0;
+            const end = points.length - 1;
+            
+            for (let i = 1; i < end; i++) {
+                const dist = perpendicularDistance(points[i], points[0], points[end]);
+                if (dist > maxDist) {
+                    maxDist = dist;
+                    index = i;
+                }
+            }
+            
+            if (maxDist > epsilon) {
+                const left = rdpSimplify(points.slice(0, index + 1), epsilon);
+                const right = rdpSimplify(points.slice(index), epsilon);
+                return left.slice(0, -1).concat(right);
+            }
+            
+            return [points[0], points[end]];
+        }
+
+        function perpendicularDistance(point, lineStart, lineEnd) {
+            const dx = lineEnd.x - lineStart.x;
+            const dy = lineEnd.y - lineStart.y;
+            
+            const mag = Math.sqrt(dx * dx + dy * dy);
+            if (mag === 0) return Math.sqrt((point.x - lineStart.x) ** 2 + (point.y - lineStart.y) ** 2);
+            
+            const u = ((point.x - lineStart.x) * dx + (point.y - lineStart.y) * dy) / (mag * mag);
+            
+            const closestX = lineStart.x + u * dx;
+            const closestY = lineStart.y + u * dy;
+            
+            return Math.sqrt((point.x - closestX) ** 2 + (point.y - closestY) ** 2);
+        }
+
+        function catmullRomSpline(points, segments) {
+            if (points.length < 2) return points;
+            
+            const result = [];
+            
+            for (let i = 0; i < points.length - 1; i++) {
+                const p0 = points[Math.max(i - 1, 0)];
+                const p1 = points[i];
+                const p2 = points[Math.min(i + 1, points.length - 1)];
+                const p3 = points[Math.min(i + 2, points.length - 1)];
+                
+                for (let t = 0; t < segments; t++) {
+                    const tt = t / segments;
+                    result.push(catmullRomPoint(p0, p1, p2, p3, tt));
+                }
+            }
+            
+            result.push(points[points.length - 1]);
+            return result;
+        }
+
+        function catmullRomPoint(p0, p1, p2, p3, t) {
+            const t2 = t * t;
+            const t3 = t2 * t;
+            
+            return {
+                x: 0.5 * ((2 * p1.x) + (-p0.x + p2.x) * t + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3),
+                y: 0.5 * ((2 * p1.y) + (-p0.y + p2.y) * t + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3)
+            };
+        }
+
+        function clearCanvas() {
+            drawingPoints = [];
+            drawMakerBackground();
+        }
+
+        async function saveGraph() {
+            const name = document.getElementById('graph-name').value.trim() || 'Unnamed';
+            
+            if (drawingPoints.length < 2) {
+                showToast('Please draw a line first', 'error');
+                return;
+            }
+            
+            // Normalize points to 0-1 range
+            const rect = makerCanvas.parentElement.getBoundingClientRect();
+            const padding = 30;
+            const graphW = rect.width - padding * 2;
+            const graphH = rect.height - padding * 2;
+            
+            const normalizedPoints = drawingPoints.map(p => ({
+                x: Math.max(0, Math.min(1, (p.x - padding) / graphW)),
+                y: Math.max(0, Math.min(1, 1 - (p.y - padding) / graphH))
+            }));
+            
+            if (editingGraphId) {
+                // Update existing graph
+                const graphData = {
+                    id: editingGraphId,
+                    name,
+                    points: normalizedPoints,
+                    timestamp: Date.now()
+                };
+                await updateGraphInDB(graphData);
+                editingGraphId = null;
+            } else {
+                // Create new graph
+                const graphData = {
+                    name,
+                    points: normalizedPoints,
+                    timestamp: Date.now()
+                };
+                await saveGraphToDB(graphData);
+            }
+            
+            clearCanvas();
+            document.getElementById('graph-name').value = '';
+            showToast(`"${name}" saved!`, 'success');
+            showScreen('landing');
+        }
+
+        // Export/Import Functions
+        async function exportData() {
+            const allGraphs = await getAllGraphs();
+            
+            if (allGraphs.length === 0) {
+                showToast('No graphs to export', 'error');
+                return;
+            }
+            
+            const exportObj = {
+                version: '1.0',
+                exported: new Date().toISOString(),
+                graphs: allGraphs.map(g => ({
+                    name: g.name,
+                    points: g.points,
+                    timestamp: g.timestamp
+                }))
+            };
+            
+            const dataStr = JSON.stringify(exportObj, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `locasdb-backup-${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast(`Exported ${allGraphs.length} graph${allGraphs.length !== 1 ? 's' : ''}`, 'success');
+        }
+
+        async function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                
+                if (!data.graphs || !Array.isArray(data.graphs)) {
+                    showToast('Invalid backup file', 'error');
+                    return;
+                }
+                
+                let imported = 0;
+                for (const graph of data.graphs) {
+                    if (graph.name && graph.points && Array.isArray(graph.points)) {
+                        await saveGraphToDB({
+                            name: graph.name,
+                            points: graph.points,
+                            timestamp: graph.timestamp || Date.now()
+                        });
+                        imported++;
+                    }
+                }
+                
+                showToast(`Imported ${imported} graph${imported !== 1 ? 's' : ''}`, 'success');
+                renderBestChoices();
+                updateGraphCount();
+                
+            } catch (e) {
+                showToast('Error reading file: ' + e.message, 'error');
+            }
+            
+            // Reset file input
+            event.target.value = '';
+        }
+
+        // Initialize
+        initDB().then(() => {
+            renderBestChoices();
+        });
+    </script>
 </body>
 </html>
